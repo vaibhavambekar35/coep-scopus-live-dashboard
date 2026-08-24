@@ -286,6 +286,11 @@ components.html(
                     opacity: 1 !important;
                 }}
 
+                /* Remove collapse button and sidebar header on desktop so sidebar is permanently locked open */
+                [data-testid="stSidebarHeader"],
+                section[data-testid="stSidebar"] [data-testid="stSidebarHeader"],
+                section[data-testid="stSidebar"] button[kind="headerNoPadding"],
+                section[data-testid="stSidebar"] button[data-testid="stBaseButton-headerNoPadding"],
                 button[data-testid="stSidebarCollapseButton"],
                 [data-testid="stSidebarCollapseButton"],
                 button[data-testid="stExpandSidebarButton"],
@@ -295,6 +300,9 @@ components.html(
                     pointer-events: none !important;
                     width: 0 !important;
                     height: 0 !important;
+                    min-height: 0 !important;
+                    margin: 0 !important;
+                    padding: 0 !important;
                 }}
             }}
 
