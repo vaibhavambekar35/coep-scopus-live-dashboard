@@ -249,6 +249,18 @@ def get_custom_css(theme: str = "dark") -> str:
             box-shadow: 0 6px 18px rgba(2, 132, 199, 0.6) !important;
         }}
 
+        /* Hide expand button completely whenever sidebar is already expanded */
+        section[data-testid="stSidebar"][aria-expanded="true"] ~ * button[data-testid="stExpandSidebarButton"],
+        section[data-testid="stSidebar"][aria-expanded="true"] ~ button[data-testid="stExpandSidebarButton"],
+        section[data-testid="stSidebar"][aria-expanded="true"] + * [data-testid="stExpandSidebarButton"],
+        body:has(section[data-testid="stSidebar"][aria-expanded="true"]) button[data-testid="stExpandSidebarButton"],
+        html:has(section[data-testid="stSidebar"][aria-expanded="true"]) button[data-testid="stExpandSidebarButton"] {{
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }}
+
         button[data-testid="stExpandSidebarButton"] *,
         button[data-testid="stExpandSidebarButton"] svg,
         button[data-testid="stExpandSidebarButton"] span {{
