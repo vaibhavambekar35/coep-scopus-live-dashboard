@@ -184,11 +184,10 @@ def get_custom_css(theme: str = "dark") -> str:
         }}
 
         /* Universal Inputs & Selectboxes (Sidebar & Main Dashboard Area) */
-        /* Complete Removal of Streamlit Default Toolbar, 3-Dots Menu & Footer */
+        /* Complete Removal of Streamlit Default 3-Dots Menu, Deploy Button, & Footer while PRESERVING Expand Sidebar Button */
         #MainMenu,
         [data-testid="stMainMenu"],
         header[data-testid="stHeader"] button[aria-label="View app in Streamlit Community Cloud"],
-        header[data-testid="stHeader"] [data-testid="stToolbar"],
         header[data-testid="stHeader"] [data-testid="stToolbarActions"],
         [data-testid="stDecoration"],
         [data-testid="stStatusWidget"],
@@ -212,8 +211,60 @@ def get_custom_css(theme: str = "dark") -> str:
             pointer-events: none !important;
         }}
 
-        header[data-testid="stHeader"] [data-testid="stSidebarCollapseButton"] {{
+        header[data-testid="stHeader"] [data-testid="stToolbar"] {{
+            background: transparent !important;
+            pointer-events: none !important;
+            height: 0 !important;
+            min-height: 0 !important;
+        }}
+
+        button[data-testid="stExpandSidebarButton"],
+        [data-testid="collapsedControl"] button,
+        [data-testid="collapsedControl"],
+        div:has(> button[data-testid="stExpandSidebarButton"]) {{
+            position: fixed !important;
+            top: 12px !important;
+            left: 12px !important;
+            z-index: 999999 !important;
+            background: linear-gradient(135deg, #0284C7 0%, #0369A1 100%) !important;
+            background-color: #0284C7 !important;
+            color: #FFFFFF !important;
+            border-radius: 8px !important;
+            width: 38px !important;
+            height: 38px !important;
+            box-shadow: 0 4px 14px rgba(2, 132, 199, 0.45) !important;
+            border: 1px solid rgba(255,255,255,0.25) !important;
+            display: flex !important;
+            visibility: visible !important;
+            align-items: center !important;
+            justify-content: center !important;
             pointer-events: auto !important;
+            cursor: pointer !important;
+            transition: all 0.2s ease-in-out !important;
+        }}
+
+        button[data-testid="stExpandSidebarButton"]:hover {{
+            background: linear-gradient(135deg, #0369A1 0%, #075985 100%) !important;
+            transform: scale(1.05) !important;
+            box-shadow: 0 6px 18px rgba(2, 132, 199, 0.6) !important;
+        }}
+
+        button[data-testid="stExpandSidebarButton"] *,
+        button[data-testid="stExpandSidebarButton"] svg,
+        button[data-testid="stExpandSidebarButton"] span {{
+            color: #FFFFFF !important;
+            -webkit-text-fill-color: #FFFFFF !important;
+            fill: #FFFFFF !important;
+            stroke: #FFFFFF !important;
+            pointer-events: none !important;
+        }}
+
+        button[data-testid="stSidebarCollapseButton"],
+        [data-testid="stSidebarCollapseButton"] button {{
+            pointer-events: auto !important;
+            display: flex !important;
+            visibility: visible !important;
+            cursor: pointer !important;
         }}
         html body div.stApp [data-testid="stSidebar"] [data-testid="stMultiSelect"] *,
         html body div.stApp [data-testid="stSidebar"] [data-testid="stSelectbox"] *,
@@ -1056,6 +1107,31 @@ def get_custom_css(theme: str = "dark") -> str:
         /* Desktop styles (min-width: 769px) remain 100% untouched */
         /* ========================================================= */
         @media (max-width: 768px) {{
+            button[data-testid="stExpandSidebarButton"] {{
+                position: fixed !important;
+                top: 14px !important;
+                left: 14px !important;
+                z-index: 999999 !important;
+                background: linear-gradient(135deg, #0284C7 0%, #0369A1 100%) !important;
+                background-color: #0284C7 !important;
+                color: #FFFFFF !important;
+                border-radius: 8px !important;
+                width: 40px !important;
+                height: 40px !important;
+                box-shadow: 0 4px 14px rgba(2, 132, 199, 0.5) !important;
+                border: 1px solid rgba(255,255,255,0.25) !important;
+                display: flex !important;
+                visibility: visible !important;
+                align-items: center !important;
+                justify-content: center !important;
+            }}
+
+            button[data-testid="stExpandSidebarButton"] * {{
+                color: #FFFFFF !important;
+                fill: #FFFFFF !important;
+                stroke: #FFFFFF !important;
+            }}
+
             .block-container {{
                 padding-top: 12px !important;
                 padding-left: 1rem !important;
