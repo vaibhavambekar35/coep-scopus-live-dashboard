@@ -1115,8 +1115,36 @@ def get_custom_css(theme: str = "dark") -> str:
         }}
 
         /* ========================================================= */
+        /* DESKTOP VIEWPORT (min-width: 769px): SIDEBAR ALWAYS OPEN */
+        /* ========================================================= */
+        @media (min-width: 769px) {{
+            section[data-testid="stSidebar"],
+            [data-testid="stSidebar"] {{
+                transform: none !important;
+                margin-left: 0 !important;
+                min-width: 336px !important;
+                max-width: 336px !important;
+                width: 336px !important;
+                visibility: visible !important;
+                display: block !important;
+                opacity: 1 !important;
+            }}
+
+            /* Remove collapse button on desktop so sidebar is permanently fixed open */
+            button[data-testid="stSidebarCollapseButton"],
+            [data-testid="stSidebarCollapseButton"],
+            button[data-testid="stExpandSidebarButton"],
+            [data-testid="collapsedControl"] {{
+                display: none !important;
+                visibility: hidden !important;
+                pointer-events: none !important;
+                width: 0 !important;
+                height: 0 !important;
+            }}
+        }}
+
+        /* ========================================================= */
         /* MOBILE RESPONSIVE LAYER (Strictly Scoped <= 768px & <= 480px) */
-        /* Desktop styles (min-width: 769px) remain 100% untouched */
         /* ========================================================= */
         @media (max-width: 768px) {{
             button[data-testid="stExpandSidebarButton"] {{
