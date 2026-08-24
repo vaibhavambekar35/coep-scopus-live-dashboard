@@ -333,6 +333,31 @@ components.html(
                 }}
             }}
         `;
+
+        function checkMobileSidebar() {{
+            try {{
+                const p = window.parent || window;
+                const d = p.document || document;
+                if (p.innerWidth <= 768) {{
+                    const sidebar = d.querySelector('section[data-testid="stSidebar"]');
+                    if (sidebar) {{
+                        const isExpanded = sidebar.getAttribute('aria-expanded') === 'true' || 
+                                           sidebar.getAttribute('data-expanded') === 'true' ||
+                                           p.getComputedStyle(sidebar).transform === 'none';
+                        if (isExpanded) {{
+                            const closeBtn = sidebar.querySelector('button[data-testid="stSidebarCollapseButton"], button[aria-label="Close sidebar"], [data-testid="stSidebarCollapseButton"] button');
+                            if (closeBtn) {{
+                                closeBtn.click();
+                            }}
+                        }}
+                    }}
+                }}
+            }} catch(e) {{}}
+        }}
+        checkMobileSidebar();
+        setTimeout(checkMobileSidebar, 80);
+        setTimeout(checkMobileSidebar, 250);
+        setTimeout(checkMobileSidebar, 600);
     </script>
     """,
     height=0,
