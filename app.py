@@ -273,6 +273,31 @@ components.html(
                 font-weight: 800 !important;
             }}
 
+            @media (min-width: 769px) {{
+                section[data-testid="stSidebar"],
+                [data-testid="stSidebar"] {{
+                    transform: none !important;
+                    margin-left: 0 !important;
+                    min-width: 336px !important;
+                    max-width: 336px !important;
+                    width: 336px !important;
+                    visibility: visible !important;
+                    display: block !important;
+                    opacity: 1 !important;
+                }}
+
+                button[data-testid="stSidebarCollapseButton"],
+                [data-testid="stSidebarCollapseButton"],
+                button[data-testid="stExpandSidebarButton"],
+                [data-testid="collapsedControl"] {{
+                    display: none !important;
+                    visibility: hidden !important;
+                    pointer-events: none !important;
+                    width: 0 !important;
+                    height: 0 !important;
+                }}
+            }}
+
             @media (max-width: 768px) {{
                 button[data-testid="stExpandSidebarButton"] {{
                     position: fixed !important;
