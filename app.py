@@ -51,7 +51,7 @@ st.set_page_config(
     page_title="COEP Live Scopus Intelligence Dashboard",
     page_icon="🎓",
     layout="wide",
-    initial_sidebar_state="auto"
+    initial_sidebar_state="expanded"
 )
 
 # ---------------------------------------------------------
@@ -334,16 +334,30 @@ components.html(
             }}
         `;
 
-        function checkMobileSidebar() {{
+        function checkSidebarState() {{
             try {{
                 const p = window.parent || window;
                 const d = p.document || document;
-                if (p.innerWidth <= 768) {{
+                if (p.innerWidth > 768) {{
+                    // On desktop: GUARANTEE sidebar is always open on load
+                    const sidebar = d.querySelector('section[data-testid="stSidebar"]');
+                    if (sidebar) {{
+                        const isCollapsed = sidebar.getAttribute('aria-expanded') === 'false' || 
+                                           sidebar.getAttribute('data-expanded') === 'false' ||
+                                           (p.getComputedStyle(sidebar).transform && p.getComputedStyle(sidebar).transform !== 'none' && p.getComputedStyle(sidebar).transform.includes('-'));
+                        if (isCollapsed) {{
+                            const expandBtn = d.querySelector('button[data-testid="stExpandSidebarButton"], [data-testid="collapsedControl"] button, div:has(> button[data-testid="stExpandSidebarButton"]) button');
+                            if (expandBtn) {{
+                                expandBtn.click();
+                            }}
+                        }}
+                    }}
+                }} else {{
+                    // On mobile: keep sidebar collapsed initially
                     const sidebar = d.querySelector('section[data-testid="stSidebar"]');
                     if (sidebar) {{
                         const isExpanded = sidebar.getAttribute('aria-expanded') === 'true' || 
-                                           sidebar.getAttribute('data-expanded') === 'true' ||
-                                           p.getComputedStyle(sidebar).transform === 'none';
+                                           sidebar.getAttribute('data-expanded') === 'true';
                         if (isExpanded) {{
                             const closeBtn = sidebar.querySelector('button[data-testid="stSidebarCollapseButton"], button[aria-label="Close sidebar"], [data-testid="stSidebarCollapseButton"] button');
                             if (closeBtn) {{
@@ -354,10 +368,10 @@ components.html(
                 }}
             }} catch(e) {{}}
         }}
-        checkMobileSidebar();
-        setTimeout(checkMobileSidebar, 80);
-        setTimeout(checkMobileSidebar, 250);
-        setTimeout(checkMobileSidebar, 600);
+        checkSidebarState();
+        setTimeout(checkSidebarState, 80);
+        setTimeout(checkSidebarState, 250);
+        setTimeout(checkSidebarState, 600);
     </script>
     """,
     height=0,
