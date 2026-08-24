@@ -74,29 +74,63 @@ tab_list_bg = "#0D1B2E" if current_theme == "dark" else "#F1F5F9"
 components.html(
     f"""
     <script>
-        function enforceDesktopSidebar() {{
-            try {{
-                const doc = window.parent.document;
-                if (!doc) return;
-                const width = window.parent.innerWidth || doc.documentElement.clientWidth || 1200;
-                if (width > 768) {{
-                    const collapseEls = doc.querySelectorAll('[data-testid="stSidebarHeader"], [data-testid="stSidebarCollapseButton"], button[data-testid="stBaseButton-headerNoPadding"]');
-                    collapseEls.forEach(el => {{
-                        el.style.setProperty('display', 'none', 'important');
-                        el.style.setProperty('visibility', 'hidden', 'important');
-                        el.style.setProperty('pointer-events', 'none', 'important');
-                        el.style.setProperty('height', '0px', 'important');
-                    }});
-                    const expandBtn = doc.querySelector('button[data-testid="stExpandSidebarButton"], [data-testid="collapsedControl"] button, [data-testid="collapsedControl"]');
-                    if (expandBtn) {{
-                        expandBtn.click();
+        (function() {{
+            function enforceDesktopSidebar() {{
+                try {{
+                    const p = window.parent || window;
+                    const d = p.document || document;
+                    if (!d) return;
+                    
+                    try {{
+                        p.localStorage.removeItem('st-sidebar-collapsed');
+                        p.localStorage.removeItem('stSidebarNavSeparatorState');
+                        p.localStorage.setItem('st-sidebar-expanded', 'true');
+                    }} catch(e) {{}}
+
+                    const width = p.innerWidth || d.documentElement.clientWidth || 1200;
+                    if (width > 768) {{
+                        const collapseEls = d.querySelectorAll('[data-testid="stSidebarHeader"], [data-testid="stSidebarCollapseButton"], button[data-testid="stBaseButton-headerNoPadding"], button[kind="headerNoPadding"]');
+                        collapseEls.forEach(el => {{
+                            el.style.setProperty('display', 'none', 'important');
+                            el.style.setProperty('visibility', 'hidden', 'important');
+                            el.style.setProperty('pointer-events', 'none', 'important');
+                            el.style.setProperty('height', '0px', 'important');
+                            el.style.setProperty('width', '0px', 'important');
+                            el.style.setProperty('opacity', '0', 'important');
+                        }});
+                        const expandBtn = d.querySelector('button[data-testid="stExpandSidebarButton"], [data-testid="collapsedControl"] button, [data-testid="collapsedControl"], button[aria-label="Expand sidebar"]');
+                        if (expandBtn) {{
+                            expandBtn.click();
+                        }}
                     }}
+                }} catch(e) {{}}
+            }}
+            
+            enforceDesktopSidebar();
+            setInterval(enforceDesktopSidebar, 150);
+            
+            try {{
+                const p = window.parent || window;
+                const d = p.document || document;
+                if (d && d.documentElement) {{
+                    const obs = new MutationObserver(enforceDesktopSidebar);
+                    obs.observe(d.documentElement, {{ childList: true, subtree: true, attributes: true }});
+                }}
+                if (p) {{
+                    p.addEventListener('resize', enforceDesktopSidebar);
+                    p.addEventListener('DOMContentLoaded', enforceDesktopSidebar);
+                    p.addEventListener('load', enforceDesktopSidebar);
                 }}
             }} catch(e) {{}}
-        }}
-        enforceDesktopSidebar();
-        setInterval(enforceDesktopSidebar, 200);
+        }})();
+    </script>
+    """,
+    height=0
+)
 
+components.html(
+    f"""
+    <script>
         const doc = window.parent.document;
         let style = doc.getElementById('scopus-ph-override');
         if (!style) {{
