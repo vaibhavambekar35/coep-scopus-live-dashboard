@@ -268,15 +268,6 @@ def get_custom_css(theme: str = "dark") -> str:
             -webkit-text-fill-color: #FFFFFF !important;
             fill: #FFFFFF !important;
             stroke: #FFFFFF !important;
-            pointer-events: none !important;
-        }}
-
-        button[data-testid="stSidebarCollapseButton"],
-        [data-testid="stSidebarCollapseButton"] button {{
-            pointer-events: auto !important;
-            display: flex !important;
-            visibility: visible !important;
-            cursor: pointer !important;
         }}
         html body div.stApp [data-testid="stSidebar"] [data-testid="stMultiSelect"] *,
         html body div.stApp [data-testid="stSidebar"] [data-testid="stSelectbox"] *,
@@ -1132,15 +1123,22 @@ def get_custom_css(theme: str = "dark") -> str:
 
             /* Remove collapse button and sidebar header on desktop so sidebar is permanently locked open */
             [data-testid="stSidebarHeader"],
+            [data-testid="stSidebarHeader"] *,
             section[data-testid="stSidebar"] [data-testid="stSidebarHeader"],
+            section[data-testid="stSidebar"] [data-testid="stSidebarHeader"] *,
             section[data-testid="stSidebar"] button[kind="headerNoPadding"],
-            section[data-testid="stSidebar"] button[data-testid="stBaseButton-headerNoPadding"],
+            section[data-testid="stSidebar"] button[kind="headerNoPadding"] *,
+            section[data-testid="stSidebar"] button[data-testid*="headerNoPadding"],
+            section[data-testid="stSidebar"] button[data-testid*="headerNoPadding"] *,
+            section[data-testid="stSidebar"] [data-testid="stSidebarCollapseButton"],
+            section[data-testid="stSidebar"] [data-testid="stSidebarCollapseButton"] *,
             button[data-testid="stSidebarCollapseButton"],
             [data-testid="stSidebarCollapseButton"],
             button[data-testid="stExpandSidebarButton"],
             [data-testid="collapsedControl"] {{
                 display: none !important;
                 visibility: hidden !important;
+                opacity: 0 !important;
                 pointer-events: none !important;
                 width: 0 !important;
                 height: 0 !important;
@@ -1171,12 +1169,26 @@ def get_custom_css(theme: str = "dark") -> str:
                 visibility: visible !important;
                 align-items: center !important;
                 justify-content: center !important;
+                pointer-events: auto !important;
+                cursor: pointer !important;
             }}
 
             button[data-testid="stExpandSidebarButton"] * {{
                 color: #FFFFFF !important;
                 fill: #FFFFFF !important;
                 stroke: #FFFFFF !important;
+            }}
+
+            [data-testid="stSidebarHeader"],
+            section[data-testid="stSidebar"] [data-testid="stSidebarHeader"],
+            button[data-testid="stSidebarCollapseButton"],
+            [data-testid="stSidebarCollapseButton"],
+            section[data-testid="stSidebar"] button[kind="headerNoPadding"],
+            section[data-testid="stSidebar"] button[data-testid*="headerNoPadding"] {{
+                display: flex !important;
+                visibility: visible !important;
+                pointer-events: auto !important;
+                cursor: pointer !important;
             }}
 
             .block-container {{
