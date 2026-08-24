@@ -156,14 +156,6 @@ components.html(
                 pointer-events: none !important;
             }}
 
-            button[data-testid="stSidebarCollapseButton"],
-            [data-testid="stSidebarCollapseButton"] button {{
-                pointer-events: auto !important;
-                display: flex !important;
-                visibility: visible !important;
-                cursor: pointer !important;
-            }}
-
             .block-container {{
                 padding-top: 14px !important;
                 padding-bottom: 2rem !important;
@@ -288,15 +280,22 @@ components.html(
 
                 /* Remove collapse button and sidebar header on desktop so sidebar is permanently locked open */
                 [data-testid="stSidebarHeader"],
+                [data-testid="stSidebarHeader"] *,
                 section[data-testid="stSidebar"] [data-testid="stSidebarHeader"],
+                section[data-testid="stSidebar"] [data-testid="stSidebarHeader"] *,
                 section[data-testid="stSidebar"] button[kind="headerNoPadding"],
-                section[data-testid="stSidebar"] button[data-testid="stBaseButton-headerNoPadding"],
+                section[data-testid="stSidebar"] button[kind="headerNoPadding"] *,
+                section[data-testid="stSidebar"] button[data-testid*="headerNoPadding"],
+                section[data-testid="stSidebar"] button[data-testid*="headerNoPadding"] *,
+                section[data-testid="stSidebar"] [data-testid="stSidebarCollapseButton"],
+                section[data-testid="stSidebar"] [data-testid="stSidebarCollapseButton"] *,
                 button[data-testid="stSidebarCollapseButton"],
                 [data-testid="stSidebarCollapseButton"],
                 button[data-testid="stExpandSidebarButton"],
                 [data-testid="collapsedControl"] {{
                     display: none !important;
                     visibility: hidden !important;
+                    opacity: 0 !important;
                     pointer-events: none !important;
                     width: 0 !important;
                     height: 0 !important;
@@ -324,6 +323,8 @@ components.html(
                     visibility: visible !important;
                     align-items: center !important;
                     justify-content: center !important;
+                    pointer-events: auto !important;
+                    cursor: pointer !important;
                 }}
 
                 button[data-testid="stExpandSidebarButton"] * {{
@@ -331,6 +332,19 @@ components.html(
                     fill: #FFFFFF !important;
                     stroke: #FFFFFF !important;
                 }}
+
+                [data-testid="stSidebarHeader"],
+                section[data-testid="stSidebar"] [data-testid="stSidebarHeader"],
+                button[data-testid="stSidebarCollapseButton"],
+                [data-testid="stSidebarCollapseButton"],
+                section[data-testid="stSidebar"] button[kind="headerNoPadding"],
+                section[data-testid="stSidebar"] button[data-testid*="headerNoPadding"] {{
+                    display: flex !important;
+                    visibility: visible !important;
+                    pointer-events: auto !important;
+                    cursor: pointer !important;
+                }}
+            }}
 
                 .block-container {{
                     padding-top: 12px !important;
@@ -1805,56 +1819,45 @@ with tab_feed:
 components.html(
     """
     <script>
-        function enforceSidebar() {
-            try {
-                const p = window.parent || window;
-                const d = p.document || document;
-                if (!d) return;
-                
+        (function() {
+            function enforceSidebar() {
                 try {
-                    p.localStorage.removeItem('st-sidebar-collapsed');
-                    p.localStorage.setItem('st-sidebar-expanded', 'true');
-                } catch(e) {}
-
-                const width = p.innerWidth || d.documentElement.clientWidth || 1200;
-                
-                if (width > 768) {
-                    const sidebar = d.querySelector('section[data-testid="stSidebar"]');
-                    const expandBtn = d.querySelector('button[data-testid="stExpandSidebarButton"], [data-testid="collapsedControl"] button, button[aria-label="Expand sidebar"]');
+                    const p = window.parent || window;
+                    const d = p.document || document;
+                    if (!d) return;
                     
-                    if (sidebar) {
-                        const style = p.getComputedStyle(sidebar);
-                        const isClosed = sidebar.getAttribute('aria-expanded') === 'false' || 
-                                         sidebar.getAttribute('data-expanded') === 'false' || 
-                                         (style.transform && style.transform !== 'none' && style.transform.includes('-'));
-                        if (isClosed && expandBtn) {
+                    try {
+                        p.localStorage.removeItem('st-sidebar-collapsed');
+                        p.localStorage.removeItem('stSidebarNavSeparatorState');
+                        p.localStorage.setItem('st-sidebar-expanded', 'true');
+                    } catch(e) {}
+
+                    const width = p.innerWidth || d.documentElement.clientWidth || 1200;
+                    
+                    if (width > 768) {
+                        const sidebar = d.querySelector('section[data-testid="stSidebar"]');
+                        const expandBtn = d.querySelector('button[data-testid="stExpandSidebarButton"], [data-testid="collapsedControl"] button, [data-testid="collapsedControl"], button[aria-label="Expand sidebar"]');
+                        
+                        if (expandBtn && expandBtn.offsetParent !== null) {
                             expandBtn.click();
-                        }
-                    } else if (expandBtn) {
-                        expandBtn.click();
-                    }
-                } else {
-                    const sidebar = d.querySelector('section[data-testid="stSidebar"]');
-                    if (sidebar) {
-                        const isExpanded = sidebar.getAttribute('aria-expanded') === 'true' || 
-                                           sidebar.getAttribute('data-expanded') === 'true';
-                        if (isExpanded) {
-                            const closeBtn = sidebar.querySelector('button[data-testid="stSidebarCollapseButton"], button[aria-label="Close sidebar"]');
-                            if (closeBtn) {
-                                closeBtn.click();
-                            }
+                        } else if (sidebar && sidebar.getAttribute('aria-expanded') === 'false') {
+                            if (expandBtn) expandBtn.click();
                         }
                     }
-                }
-            } catch(err) {}
-        }
-        enforceSidebar();
-        setTimeout(enforceSidebar, 50);
-        setTimeout(enforceSidebar, 200);
-        setTimeout(enforceSidebar, 500);
-        setTimeout(enforceSidebar, 1000);
+                } catch(err) {}
+            }
+            
+            enforceSidebar();
+            const interval = setInterval(enforceSidebar, 200);
+            setTimeout(() => clearInterval(interval), 4000);
+            
+            if (window.parent) {
+                window.parent.addEventListener('resize', enforceSidebar);
+            }
+        })();
     </script>
     """,
     height=0,
     width=0,
 )
+
