@@ -74,6 +74,29 @@ tab_list_bg = "#0D1B2E" if current_theme == "dark" else "#F1F5F9"
 components.html(
     f"""
     <script>
+        function enforceDesktopSidebar() {{
+            try {{
+                const doc = window.parent.document;
+                if (!doc) return;
+                const width = window.parent.innerWidth || doc.documentElement.clientWidth || 1200;
+                if (width > 768) {{
+                    const collapseEls = doc.querySelectorAll('[data-testid="stSidebarHeader"], [data-testid="stSidebarCollapseButton"], button[data-testid="stBaseButton-headerNoPadding"]');
+                    collapseEls.forEach(el => {{
+                        el.style.setProperty('display', 'none', 'important');
+                        el.style.setProperty('visibility', 'hidden', 'important');
+                        el.style.setProperty('pointer-events', 'none', 'important');
+                        el.style.setProperty('height', '0px', 'important');
+                    }});
+                    const expandBtn = doc.querySelector('button[data-testid="stExpandSidebarButton"], [data-testid="collapsedControl"] button, [data-testid="collapsedControl"]');
+                    if (expandBtn) {{
+                        expandBtn.click();
+                    }}
+                }}
+            }} catch(e) {{}}
+        }}
+        enforceDesktopSidebar();
+        setInterval(enforceDesktopSidebar, 200);
+
         const doc = window.parent.document;
         let style = doc.getElementById('scopus-ph-override');
         if (!style) {{
