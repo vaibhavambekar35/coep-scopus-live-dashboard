@@ -1765,3 +1765,63 @@ with tab_feed:
                     st.write(f"**Affiliated Institutions:** {', '.join(item.get('collaborating_institutions'))}")
                 if item.get("collaborating_countries"):
                     st.write(f"**Partner Countries:** {', '.join(item.get('collaborating_countries'))}")
+
+# ---------------------------------------------------------
+# Post-Render Sidebar State Enforcement (Desktop: Always Open, Mobile: Collapsed)
+# ---------------------------------------------------------
+components.html(
+    """
+    <script>
+        function enforceSidebar() {
+            try {
+                const p = window.parent || window;
+                const d = p.document || document;
+                if (!d) return;
+                
+                try {
+                    p.localStorage.removeItem('st-sidebar-collapsed');
+                    p.localStorage.setItem('st-sidebar-expanded', 'true');
+                } catch(e) {}
+
+                const width = p.innerWidth || d.documentElement.clientWidth || 1200;
+                
+                if (width > 768) {
+                    const sidebar = d.querySelector('section[data-testid="stSidebar"]');
+                    const expandBtn = d.querySelector('button[data-testid="stExpandSidebarButton"], [data-testid="collapsedControl"] button, button[aria-label="Expand sidebar"]');
+                    
+                    if (sidebar) {
+                        const style = p.getComputedStyle(sidebar);
+                        const isClosed = sidebar.getAttribute('aria-expanded') === 'false' || 
+                                         sidebar.getAttribute('data-expanded') === 'false' || 
+                                         (style.transform && style.transform !== 'none' && style.transform.includes('-'));
+                        if (isClosed && expandBtn) {
+                            expandBtn.click();
+                        }
+                    } else if (expandBtn) {
+                        expandBtn.click();
+                    }
+                } else {
+                    const sidebar = d.querySelector('section[data-testid="stSidebar"]');
+                    if (sidebar) {
+                        const isExpanded = sidebar.getAttribute('aria-expanded') === 'true' || 
+                                           sidebar.getAttribute('data-expanded') === 'true';
+                        if (isExpanded) {
+                            const closeBtn = sidebar.querySelector('button[data-testid="stSidebarCollapseButton"], button[aria-label="Close sidebar"]');
+                            if (closeBtn) {
+                                closeBtn.click();
+                            }
+                        }
+                    }
+                }
+            } catch(err) {}
+        }
+        enforceSidebar();
+        setTimeout(enforceSidebar, 50);
+        setTimeout(enforceSidebar, 200);
+        setTimeout(enforceSidebar, 500);
+        setTimeout(enforceSidebar, 1000);
+    </script>
+    """,
+    height=0,
+    width=0,
+)
