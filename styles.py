@@ -843,16 +843,18 @@ def get_custom_css(theme: str = "dark") -> str:
             display: flex !important;
             flex-direction: row !important;
             flex-wrap: nowrap !important;
-            justify-content: space-between !important;
-            align-items: stretch !important;
+            justify-content: flex-start !important;
+            align-items: center !important;
             width: 100% !important;
-            gap: 6px !important;
+            gap: 4px !important;
             background-color: {'#0D1B2E' if is_dark else '#F1F5F9'} !important;
-            padding: 6px 8px !important;
+            padding: 5px 6px !important;
             border-radius: 12px !important;
             border: 1.5px solid {border_color} !important;
             margin-bottom: 24px !important;
-            overflow: visible !important;
+            overflow-x: auto !important;
+            overflow-y: hidden !important;
+            scrollbar-width: none !important;
         }}
 
         div[data-testid="stTab"],
@@ -861,14 +863,14 @@ def get_custom_css(theme: str = "dark") -> str:
         button[data-testid="stTab"],
         div[data-baseweb="tab-list"] button[data-baseweb="tab"],
         div[data-testid="stTabs"] [role="tab"] {{
-            flex: 1 1 0 !important;
-            min-width: 0 !important;
+            flex: 1 1 auto !important;
+            min-width: max-content !important;
             display: inline-flex !important;
             justify-content: center !important;
             align-items: center !important;
             text-align: center !important;
             border-radius: 8px !important;
-            padding: 8px 12px !important;
+            padding: 7px 11px !important;
             border: none !important;
             background: transparent !important;
             background-color: transparent !important;
@@ -888,7 +890,7 @@ def get_custom_css(theme: str = "dark") -> str:
             color: {'#94A3B8' if is_dark else '#1E293B'} !important;
             -webkit-text-fill-color: {'#94A3B8' if is_dark else '#1E293B'} !important;
             font-weight: 700 !important;
-            font-size: 0.88rem !important;
+            font-size: 0.84rem !important;
             opacity: 1 !important;
             white-space: nowrap !important;
             margin: 0 !important;

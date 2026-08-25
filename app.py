@@ -214,14 +214,16 @@ components.html(
                 display: flex !important;
                 flex-direction: row !important;
                 flex-wrap: nowrap !important;
-                justify-content: space-between !important;
-                align-items: stretch !important;
+                justify-content: flex-start !important;
+                align-items: center !important;
                 width: 100% !important;
                 background-color: {tab_list_bg} !important;
-                gap: 6px !important;
-                padding: 6px 8px !important;
+                gap: 4px !important;
+                padding: 5px 6px !important;
                 border-radius: 12px !important;
-                overflow: visible !important;
+                overflow-x: auto !important;
+                overflow-y: hidden !important;
+                scrollbar-width: none !important;
             }}
 
             div[data-testid="stTab"],
@@ -229,15 +231,15 @@ components.html(
             button[role="tab"],
             button[data-testid="stTab"],
             div[data-testid="stTabs"] [role="tab"] {{
-                flex: 1 1 0 !important;
-                min-width: 0 !important;
+                flex: 1 1 auto !important;
+                min-width: max-content !important;
                 display: inline-flex !important;
                 justify-content: center !important;
                 align-items: center !important;
                 text-align: center !important;
                 background-color: transparent !important;
                 border-radius: 8px !important;
-                padding: 8px 12px !important;
+                padding: 7px 11px !important;
                 cursor: pointer !important;
                 white-space: nowrap !important;
             }}
@@ -253,7 +255,7 @@ components.html(
                 color: {tab_text_color} !important;
                 -webkit-text-fill-color: {tab_text_color} !important;
                 font-weight: 700 !important;
-                font-size: 0.88rem !important;
+                font-size: 0.84rem !important;
                 opacity: 1 !important;
                 white-space: nowrap !important;
                 margin: 0 !important;
@@ -902,13 +904,13 @@ st.markdown("<br>", unsafe_allow_html=True)
 # 7 CORE DASHBOARD SECTIONS IN TABS
 # ---------------------------------------------------------
 tab_trends, tab_impact, tab_collab, tab_quality, tab_authors, tab_feed, tab_copilot = st.tabs([
-    "📈 Publication Trends",
-    "🎯 Research Impact",
+    "📈 Trends",
+    "🎯 Impact",
     "🌐 Collaboration",
-    "🏆 Research Quality",
-    "👥 Author Intelligence",
-    "📰 Live Publication Feed",
-    "🤖 AI Research Copilot"
+    "🏆 Quality",
+    "👥 Authors",
+    "📰 Live Feed",
+    "🤖 AI Copilot"
 ])
 
 # ---------------------------------------------------------
