@@ -491,13 +491,15 @@ def get_custom_css(theme: str = "dark") -> str:
         /* ========================================================= */
         .icare-topbar {{
             background: {bg_card};
-            border-bottom: 1px solid {border_color};
-            padding: 14px 24px;
-            margin: -14px -4rem 20px -4rem;
+            border: 1px solid {border_color};
+            border-radius: 14px;
+            padding: 12px 20px;
+            margin: 0 0 20px 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
+            gap: 12px;
             box-shadow: 0 4px 20px rgba(0,0,0,{'0.25' if is_dark else '0.04'});
         }}
 
@@ -1221,8 +1223,9 @@ def get_custom_css(theme: str = "dark") -> str:
 
             /* Topbar Mobile */
             .icare-topbar {{
-                margin: -12px -1rem 16px -1rem !important;
+                margin: 0 0 16px 0 !important;
                 padding: 12px 14px !important;
+                border-radius: 12px !important;
                 flex-direction: column !important;
                 align-items: flex-start !important;
                 gap: 12px !important;
