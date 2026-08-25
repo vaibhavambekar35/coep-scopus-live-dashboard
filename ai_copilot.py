@@ -2,7 +2,7 @@
 """
 COEP AI Research Copilot & Intelligence Engine
 Provides interactive natural language question answering, executive dossier generation,
-author lookup, topic search, and smart analytical querying over COEP Scopus publication dataset.
+author lookup, topic search, CiteScore/SJR journal rankings, and smart analytical querying.
 """
 
 import os
@@ -42,11 +42,7 @@ def call_gemini_api(prompt: str, context: str, api_key: str) -> Optional[str]:
         
         payload = {
             "contents": [
-                {
-                    "parts": [
-                        {"text": full_content}
-                    ]
-                }
+                {"parts": [{"text": full_content}]}
             ],
             "generationConfig": {
                 "temperature": 0.2,
@@ -131,7 +127,6 @@ def search_specific_author(prompt: str, df: pd.DataFrame) -> pd.DataFrame:
     if df.empty:
         return pd.DataFrame()
         
-    # Strip common stopwords and title prefixes
     cleaned = re.sub(r'\b(dr|prof|professor|mr|mrs|ms|published|authored|by|documents|papers|number|of|how|many|count|who|is|give|me|find|show|details|for|about|articles)\b', '', prompt, flags=re.IGNORECASE).strip(' .?,:;!')
     raw_tokens = [t for t in re.split(r'\s+', cleaned) if len(t) >= 3]
     
@@ -140,25 +135,82 @@ def search_specific_author(prompt: str, df: pd.DataFrame) -> pd.DataFrame:
         
     for token in raw_tokens:
         t_pattern = rf'\b{re.escape(token.lower())}\b'
-        
-        # 1. Search primary_author (word boundary match)
         if "primary_author" in df.columns:
             m1 = df["primary_author"].astype(str).str.lower().str.contains(t_pattern, regex=True, na=False)
             if m1.any():
                 return df[m1]
-                
-        # 2. Search coep_authors / authors_str
         if "coep_authors" in df.columns:
             m2 = df["coep_authors"].astype(str).str.lower().str.contains(t_pattern, regex=True, na=False)
             if m2.any():
                 return df[m2]
-                
         if "authors_str" in df.columns:
             m3 = df["authors_str"].astype(str).str.lower().str.contains(t_pattern, regex=True, na=False)
             if m3.any():
                 return df[m3]
                 
     return pd.DataFrame()
+
+
+def get_citescore_leaderboard_response(df: pd.DataFrame) -> str:
+    """Renders the top publications ranked strictly by highest CiteScore / SJR."""
+    if df.empty or "citescore" not in df.columns:
+        return "No CiteScore data available."
+        
+    top_cs = df.sort_values("citescore", ascending=False).head(5)
+    
+    rows = []
+    for i, (_, r) in enumerate(top_cs.iterrows(), 1):
+        cs_val = round(float(r.get("citescore", 0.0)), 1)
+        sjr_val = round(float(r.get("sjr", 0.0)), 2)
+        cites_val = int(r.get("citations", 0))
+        auth_val = r.get("primary_author") or r.get("authors_str", "COEP Faculty")
+        
+        rows.append(
+            f"**{i}. {r.get('title', 'N/A')}**\n"
+            f"- 🏆 **CiteScore:** **{cs_val}** | SJR: **{sjr_val}** | Quartile: **{r.get('quartile', 'Q1')}**\n"
+            f"- 📖 **Journal / Source:** *{r.get('journal', 'N/A')}*\n"
+            f"- 👤 **Author:** {auth_val} | 📅 Year: **{r.get('year', 'N/A')}** | 🌟 Citations: **{cites_val:,}**\n"
+            f"- 🏛️ **Department:** {r.get('department', 'N/A')}\n"
+        )
+        
+    highest_cs_journal = top_cs.iloc[0].get("journal", "N/A")
+    highest_cs_score = round(float(top_cs.iloc[0].get("citescore", 0.0)), 1)
+    
+    return f"""### 🏆 Highest CiteScore Publications (COEP Scopus Archive)
+
+**Leader:** The highest CiteScore publication in the COEP archive is published in ***{highest_cs_journal}*** with a **CiteScore of {highest_cs_score}**.
+
+---
+
+{chr(10).join(rows)}
+💡 *Note:* CiteScore measures the average citations received per peer-reviewed document over a 4-year window in Scopus.
+"""
+
+
+def get_most_cited_papers_response(df: pd.DataFrame) -> str:
+    """Renders top papers ranked by cumulative citations."""
+    if df.empty or "citations" not in df.columns:
+        return "No citation data available."
+        
+    top_cites = df.sort_values("citations", ascending=False).head(5)
+    
+    rows = []
+    for i, (_, r) in enumerate(top_cites.iterrows(), 1):
+        cites_val = int(r.get("citations", 0))
+        auth_val = r.get("primary_author") or r.get("authors_str", "COEP Faculty")
+        rows.append(
+            f"**{i}. {r.get('title', 'N/A')}**\n"
+            f"- 🌟 **Citations:** **{cites_val:,} citations**\n"
+            f"- 📖 **Journal:** *{r.get('journal', 'N/A')}* ({r.get('year', 'N/A')})\n"
+            f"- 👤 **Primary Author:** {auth_val} | 🏛️ **Dept:** {r.get('department', 'N/A')}\n"
+        )
+        
+    return f"""### 🌟 Top Landmark Publications by Citations (COEP Archive)
+
+---
+
+{chr(10).join(rows)}
+"""
 
 
 def get_top_authors_response(df: pd.DataFrame) -> str:
@@ -280,15 +332,33 @@ def run_analytical_copilot(prompt: str, df: pd.DataFrame, kpis: Dict[str, Any]) 
     total_cites = int(df["citations"].sum()) if "citations" in df.columns else 0
     cpp = round(total_cites / max(1, total_pubs), 2)
     
-    # 1. Accreditation / Executive / NIRF / NAAC Summary
-    if any(w in q for w in ["dossier", "executive", "nirf", "naac", "accreditation", "report", "overview", "briefing"]):
+    # ---------------------------------------------------------
+    # 1. CITESCORE / SJR / IMPACT FACTOR PAPER RANKINGS
+    # ---------------------------------------------------------
+    if any(p in q for p in ["citescore", "cite score", "sjr", "impact factor", "highest citescore", "most citescore", "top citescore", "prestigious"]):
+        return get_citescore_leaderboard_response(df)
+
+    # ---------------------------------------------------------
+    # 2. ACCREDITATION / EXECUTIVE / NIRF / NAAC SUMMARY
+    # ---------------------------------------------------------
+    if any(w in q for w in ["dossier", "executive", "nirf", "naac", "accreditation", "report", "briefing"]):
         return generate_executive_dossier(df, kpis)
         
-    # 2. General Author Rankings / Leaderboard ("who has most citations", "top authors")
-    if any(p in q for p in ["most cited", "top cited", "highest citation", "top author", "leading author", "top faculty", "highest publication", "most paper", "most document", "top contributor", "who has the most", "who is the top"]):
+    # ---------------------------------------------------------
+    # 3. MOST CITED PAPERS / LANDMARK CITATION RANKINGS
+    # ---------------------------------------------------------
+    if any(p in q for p in ["most cited paper", "highest cited paper", "highest citation paper", "top cited paper", "landmark paper", "most cited document", "highest citation", "top citations"]):
+        return get_most_cited_papers_response(df)
+
+    # ---------------------------------------------------------
+    # 4. GENERAL AUTHOR RANKINGS / LEADERBOARD
+    # ---------------------------------------------------------
+    if any(p in q for p in ["most cited faculty", "most cited author", "top author", "leading author", "top faculty", "highest publication", "most paper", "most document", "top contributor", "who has the most", "who is the top"]):
         return get_top_authors_response(df)
 
-    # 3. Specific Author Name Lookup (Dr. Chaskar, Prof. Patil, etc.)
+    # ---------------------------------------------------------
+    # 5. SPECIFIC AUTHOR NAME LOOKUP (Dr. Chaskar, Prof. Patil, etc.)
+    # ---------------------------------------------------------
     author_matches = search_specific_author(prompt, df)
     if not author_matches.empty:
         num_docs = len(author_matches)
@@ -320,7 +390,9 @@ def run_analytical_copilot(prompt: str, df: pd.DataFrame, kpis: Dict[str, Any]) 
 {chr(10).join(p_rows)}
 """
 
-    # 4. Department Queries
+    # ---------------------------------------------------------
+    # 6. DEPARTMENT QUERIES
+    # ---------------------------------------------------------
     dept_keywords = {
         "mechanical": "Mechanical Engineering",
         "computer": "Computer Engineering & IT",
@@ -344,8 +416,10 @@ def run_analytical_copilot(prompt: str, df: pd.DataFrame, kpis: Dict[str, Any]) 
     if any(w in q for w in ["department", "dept", "school", "branch", "ranking", "leaderboard", "leading"]):
         return get_department_leaderboard_response(df)
 
-    # 5. Journal Quality & Quartiles (Q1, Q2, Q3, Q4)
-    if any(w in q for w in ["q1", "q2", "q3", "q4", "quartile", "quality", "tier", "impact factor", "citescore"]):
+    # ---------------------------------------------------------
+    # 7. JOURNAL QUALITY & QUARTILES (Q1, Q2, Q3, Q4)
+    # ---------------------------------------------------------
+    if any(w in q for w in ["q1", "q2", "q3", "q4", "quartile", "quality", "tier"]):
         if "quartile" in df.columns:
             q_counts = df["quartile"].value_counts()
             q1_c = int(q_counts.get("Q1", 0))
@@ -377,7 +451,9 @@ def run_analytical_copilot(prompt: str, df: pd.DataFrame, kpis: Dict[str, Any]) 
 **Top Cited Q1 Papers from COEP:**
 """ + "\n".join(p_list)
 
-    # 6. Collaborations & Partnerships
+    # ---------------------------------------------------------
+    # 8. COLLABORATIONS & PARTNERSHIPS
+    # ---------------------------------------------------------
     if any(w in q for w in ["collab", "international", "industry", "cross", "multidisciplinary", "partner", "foreign", "team"]):
         intl = kpis.get("intl_collab", 0)
         ind = kpis.get("industry_collab", 0)
@@ -394,8 +470,10 @@ def run_analytical_copilot(prompt: str, df: pd.DataFrame, kpis: Dict[str, Any]) 
 3. **Smart Urban Infrastructure & IoT:** Multi-department initiative between *Civil Engineering*, *Electronics & Telecommunication*, and *Instrumentation*.
 """
 
-    # 7. Topic / Keyword Search (e.g., Solar, AI, Robotics, Concrete, EV, Battery)
-    topic_words = [w for w in re.split(r'\s+', q) if len(w) >= 3 and w not in ["what", "how", "many", "papers", "about", "show", "find", "tell", "coep", "give", "the", "for", "and", "are"]]
+    # ---------------------------------------------------------
+    # 9. TOPIC / KEYWORD SEARCH (e.g., Solar, AI, Robotics, Concrete, EV, Battery)
+    # ---------------------------------------------------------
+    topic_words = [w for w in re.split(r'\s+', q) if len(w) >= 3 and w not in ["what", "how", "many", "papers", "about", "show", "find", "tell", "coep", "give", "the", "for", "and", "are", "paper"]]
     if topic_words:
         for tw in topic_words:
             t_mask = df["title"].astype(str).str.lower().str.contains(tw, na=False) | df["abstract"].astype(str).str.lower().str.contains(tw, na=False)
@@ -415,7 +493,9 @@ def run_analytical_copilot(prompt: str, df: pd.DataFrame, kpis: Dict[str, Any]) 
 {chr(10).join(p_list)}
 """
 
-    # 8. Default Overview
+    # ---------------------------------------------------------
+    # 10. DEFAULT OVERVIEW
+    # ---------------------------------------------------------
     return f"""### 🤖 COEP Research Intelligence Overview
 
 Based on the filtered Scopus dataset of **{total_pubs:,} indexed publications**:
@@ -425,10 +505,10 @@ Based on the filtered Scopus dataset of **{total_pubs:,} indexed publications**:
 - 🌐 **Collaboration Reach:** **{kpis.get('intl_collab', 'N/A')} international** and **{kpis.get('industry_collab', 'N/A')} industry** joint publications.
 
 **Suggested Queries You Can Try:**
+- *\"What is the highest CiteScore paper?\"*
 - *\"Number of documents published by Dr. Chaskar\"*
 - *\"Who has the most citations in COEP?\"*
 - *\"Which department has the most Q1 publications?\"*
-- *\"Show research output for Mechanical Engineering\"*
 - *\"Find papers on Solar energy or Machine Learning\"*
 """
 
