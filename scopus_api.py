@@ -167,6 +167,8 @@ class ScopusAPIClient:
         start = 0
         count_per_req = 25  # standard page limit for Scopus API
         total_available = 0
+        session = requests.Session()
+        session.headers.update(self._get_headers())
 
         while len(all_publications) < max_results:
             params = {
@@ -177,22 +179,24 @@ class ScopusAPIClient:
                 "sort": "-coverDate"
             }
 
-            try:
-                resp = requests.get(
-                    self.BASE_URL,
-                    headers=self._get_headers(),
-                    params=params,
-                    timeout=20
-                )
-            except requests.exceptions.RequestException as e:
-                break
+            resp = None
+            for attempt in range(4):
+                try:
+                    resp = session.get(
+                        self.BASE_URL,
+                        params=params,
+                        timeout=25
+                    )
+                    if resp.status_code == 200:
+                        break
+                    elif resp.status_code == 429:
+                        time.sleep(2.5 * (attempt + 1))
+                    else:
+                        time.sleep(1.0)
+                except requests.exceptions.RequestException:
+                    time.sleep(2.0 * (attempt + 1))
 
-            if resp.status_code == 429:
-                # Rate limited, brief pause
-                time.sleep(2)
-                continue
-            
-            if resp.status_code != 200:
+            if not resp or resp.status_code != 200:
                 break
 
             data = resp.json()
