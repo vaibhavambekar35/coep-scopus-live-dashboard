@@ -153,7 +153,7 @@ class ScopusAPIClient:
 
     def fetch_coep_publications(
         self,
-        query: str = "AFFIL({College of Engineering Pune}) OR AFFIL({COEP Technological University}) OR AFFIL({COEP Pune})",
+        query: str = "AF-ID(60009476) OR AFFIL({COEP Technological University}) OR AFFIL({College of Engineering Pune}) OR AFFIL({College of Engineering Poona}) OR AFFIL({COEP Pune}) OR AFFIL({COEP Tech})",
         max_results: int = 500,
         progress_callback: Optional[Callable[[int, int, str], None]] = None
     ) -> List[Dict[str, Any]]:
@@ -478,7 +478,7 @@ def incremental_auto_sync(
     try:
         client = ScopusAPIClient(api_key=api_key)
         current_year = datetime.datetime.now().year
-        query = f"(AFFIL({{College of Engineering Pune}}) OR AFFIL({{COEP Technological University}}) OR AFFIL({{COEP Pune}})) AND PUBYEAR >= {current_year - 1}"
+        query = f"(AF-ID(60009476) OR AFFIL({{COEP Technological University}}) OR AFFIL({{College of Engineering Pune}}) OR AFFIL({{College of Engineering Poona}}) OR AFFIL({{COEP Pune}}) OR AFFIL({{COEP Tech}})) AND PUBYEAR >= {current_year - 1}"
         latest_entries = client.fetch_coep_publications(query=query, max_results=max_incremental_records)
         
         if not latest_entries:

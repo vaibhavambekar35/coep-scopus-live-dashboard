@@ -705,7 +705,7 @@ with st.sidebar:
 
         affil_query = st.text_input(
             "Affiliation Query",
-            value=os.getenv("SCOPUS_AFFIL_QUERY", "AFFIL({College of Engineering Pune}) OR AFFIL({COEP Technological University}) OR AFFIL({COEP Pune})")
+            value=os.getenv("SCOPUS_AFFIL_QUERY", "AF-ID(60009476) OR AFFIL({COEP Technological University}) OR AFFIL({College of Engineering Pune}) OR AFFIL({College of Engineering Poona}) OR AFFIL({COEP Pune}) OR AFFIL({COEP Tech})")
         )
 
         max_fetch_choice = st.selectbox(
