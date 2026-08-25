@@ -2,10 +2,11 @@
 """
 COEP AI Research Copilot & Intelligence Engine
 Provides interactive natural language question answering, executive dossier generation,
-and smart analytical querying over COEP Scopus publication dataset.
+author lookup, topic search, and smart analytical querying over COEP Scopus publication dataset.
 """
 
 import os
+import re
 import json
 import requests
 import pandas as pd
@@ -32,12 +33,12 @@ def call_gemini_api(prompt: str, context: str, api_key: str) -> Optional[str]:
         system_instruction = (
             "You are the COEP Research Intelligence AI Copilot for COEP Technological University, Pune (Estd. 1854). "
             "You have access to verified Scopus bibliometric data for COEP faculty and departments. "
-            "Provide concise, authoritative, executive-level insights, rankings, data tables, and strategic recommendations. "
-            "Always base your answers strictly on the provided Scopus data context. If data is unavailable, state it clearly. "
+            "Provide concise, authoritative, executive-level insights, rankings, data tables, and specific paper counts. "
+            "Always base your answers strictly on the provided Scopus data context. If specific author or paper data is asked, find and report it accurately. "
             "Format responses using clean Markdown with bolding, bullet points, and tables where appropriate."
         )
         
-        full_content = f"SYSTEM CONTEXT:\n{context}\n\nUSER QUESTION:\n{prompt}"
+        full_content = f"{system_instruction}\n\nSYSTEM CONTEXT:\n{context}\n\nUSER QUESTION:\n{prompt}"
         
         payload = {
             "contents": [
@@ -77,21 +78,23 @@ def generate_data_context(df: pd.DataFrame, kpis: Dict[str, Any]) -> str:
     total_cites = int(df["citations"].sum()) if "citations" in df.columns else 0
     cpp = round(total_cites / max(1, total_pubs), 2)
     
-    dept_counts = df["department"].value_counts().head(8).to_dict() if "department" in df.columns else {}
-    dept_cites = df.groupby("department")["citations"].sum().sort_values(ascending=False).head(8).to_dict() if "department" in df.columns and "citations" in df.columns else {}
+    dept_counts = df["department"].value_counts().head(10).to_dict() if "department" in df.columns else {}
+    dept_cites = df.groupby("department")["citations"].sum().sort_values(ascending=False).head(10).to_dict() if "department" in df.columns and "citations" in df.columns else {}
     q_counts = df["quartile"].value_counts().to_dict() if "quartile" in df.columns else {}
     
     top_authors = []
-    if "author" in df.columns:
-        auth_grp = df.groupby("author").agg(pubs=("title", "count"), cites=("citations", "sum")).sort_values("cites", ascending=False).head(10)
+    auth_col = "primary_author" if "primary_author" in df.columns else None
+    if auth_col:
+        auth_grp = df.groupby(auth_col).agg(pubs=("title", "count"), cites=("citations", "sum")).sort_values("cites", ascending=False).head(15)
         for auth, row in auth_grp.iterrows():
             top_authors.append(f"{auth}: {int(row['pubs'])} papers, {int(row['cites'])} citations")
             
     landmarks = []
     if "citations" in df.columns:
-        top_papers = df.sort_values("citations", ascending=False).head(5)
+        top_papers = df.sort_values("citations", ascending=False).head(8)
         for _, r in top_papers.iterrows():
-            landmarks.append(f"- {r.get('title', 'Unknown')} ({r.get('year', 'N/A')}) in {r.get('journal', 'N/A')} - {int(r.get('citations', 0))} citations [Dept: {r.get('department', 'N/A')}]")
+            auth_val = r.get('primary_author', r.get('authors_str', 'N/A'))
+            landmarks.append(f"- \"{r.get('title', 'Unknown')}\" ({r.get('year', 'N/A')}) by {auth_val} in {r.get('journal', 'N/A')} - {int(r.get('citations', 0))} citations [Dept: {r.get('department', 'N/A')}]")
 
     q1_count = q_counts.get('Q1', 0)
     q1_pct = round(q1_count / max(1, total_pubs) * 100, 1)
@@ -108,10 +111,10 @@ def generate_data_context(df: pd.DataFrame, kpis: Dict[str, Any]) -> str:
         f"- International Collaborations: {kpis.get('intl_collab', 'N/A')}",
         f"- Industry Co-authored: {kpis.get('industry_collab', 'N/A')}",
         "",
-        "DEPARTMENT RESEARCH OUTPUT (Top 8):",
+        "DEPARTMENT RESEARCH OUTPUT (Top 10):",
         json.dumps(dept_counts, indent=2),
         "",
-        "DEPARTMENT CITATION IMPACT (Top 8):",
+        "DEPARTMENT CITATION IMPACT (Top 10):",
         json.dumps(dept_cites, indent=2),
         "",
         "TOP CONTRIBUTING FACULTY:",
@@ -123,9 +126,149 @@ def generate_data_context(df: pd.DataFrame, kpis: Dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
+def search_specific_author(prompt: str, df: pd.DataFrame) -> pd.DataFrame:
+    """Extracts author candidate tokens and finds matching author publications."""
+    if df.empty:
+        return pd.DataFrame()
+        
+    # Strip common stopwords and title prefixes
+    cleaned = re.sub(r'\b(dr|prof|professor|mr|mrs|ms|published|authored|by|documents|papers|number|of|how|many|count|who|is|give|me|find|show|details|for|about|articles)\b', '', prompt, flags=re.IGNORECASE).strip(' .?,:;!')
+    raw_tokens = [t for t in re.split(r'\s+', cleaned) if len(t) >= 3]
+    
+    if not raw_tokens:
+        return pd.DataFrame()
+        
+    for token in raw_tokens:
+        t_pattern = rf'\b{re.escape(token.lower())}\b'
+        
+        # 1. Search primary_author (word boundary match)
+        if "primary_author" in df.columns:
+            m1 = df["primary_author"].astype(str).str.lower().str.contains(t_pattern, regex=True, na=False)
+            if m1.any():
+                return df[m1]
+                
+        # 2. Search coep_authors / authors_str
+        if "coep_authors" in df.columns:
+            m2 = df["coep_authors"].astype(str).str.lower().str.contains(t_pattern, regex=True, na=False)
+            if m2.any():
+                return df[m2]
+                
+        if "authors_str" in df.columns:
+            m3 = df["authors_str"].astype(str).str.lower().str.contains(t_pattern, regex=True, na=False)
+            if m3.any():
+                return df[m3]
+                
+    return pd.DataFrame()
+
+
+def get_top_authors_response(df: pd.DataFrame) -> str:
+    """Renders top cited and highest volume author leaderboard."""
+    auth_col = "primary_author" if "primary_author" in df.columns else None
+    if not auth_col or df.empty:
+        return "No author data available."
+        
+    auth_grp = df.groupby(auth_col).agg(
+        pubs=("title", "count"),
+        cites=("citations", "sum"),
+        dept=("department", "first")
+    ).reset_index().sort_values("cites", ascending=False).head(10)
+    
+    rows = []
+    for i, r in auth_grp.iterrows():
+        cpp_auth = round(r["cites"] / max(1, r["pubs"]), 1)
+        rows.append(f"| **{r[auth_col]}** | {r['dept']} | {int(r['pubs']):,} | {int(r['cites']):,} | {cpp_auth} |")
+        
+    top_cites_auth = auth_grp.iloc[0][auth_col]
+    top_cites_val = int(auth_grp.iloc[0]["cites"])
+    top_pubs_auth = df[auth_col].value_counts().index[0]
+    top_pubs_val = int(df[auth_col].value_counts().iloc[0])
+    
+    return f"""### 👥 Top Author & Faculty Research Intelligence
+
+**Key Highlights:**
+- 🌟 **Most Cited Faculty:** **{top_cites_auth}** ({top_cites_val:,} total citations)
+- 📚 **Highest Volume Contributor:** **{top_pubs_auth}** ({top_pubs_val:,} indexed publications)
+
+| Author / Faculty | Primary Department | Papers | Total Citations | CPP |
+| :--- | :--- | :---: | :---: | :---: |
+""" + "\n".join(rows) + f"""
+
+💡 *Tip:* Ask about any specific faculty member (e.g. *\"Documents by Dr. Chaskar\"* or *\"Papers by Agashe\"*).
+"""
+
+
+def get_department_leaderboard_response(df: pd.DataFrame) -> str:
+    """Renders department output and citation leaderboard."""
+    if "department" not in df.columns or "citations" not in df.columns or df.empty:
+        return "No department data available."
+        
+    dept_stats = df.groupby("department").agg(
+        pubs=("title", "count"),
+        cites=("citations", "sum"),
+        q1=("quartile", lambda x: (x == "Q1").sum())
+    ).reset_index()
+    dept_stats["cpp"] = (dept_stats["cites"] / dept_stats["pubs"]).round(2)
+    dept_stats = dept_stats.sort_values("pubs", ascending=False)
+    
+    top_dept = dept_stats.iloc[0]["department"]
+    top_cite_dept = dept_stats.sort_values("cites", ascending=False).iloc[0]["department"]
+    top_q1_dept = dept_stats.sort_values("q1", ascending=False).iloc[0]["department"]
+    
+    table_rows = []
+    for i, r in dept_stats.head(10).iterrows():
+        table_rows.append(f"| **{r['department']}** | {int(r['pubs']):,} | {int(r['cites']):,} | {r['cpp']} | {int(r['q1']):,} |")
+        
+    return f"""### 🏛️ Departmental Research Leaderboard & Impact
+
+**Key Highlights:**
+- 🥇 **Highest Volume Department:** **{top_dept}** ({int(dept_stats.iloc[0]['pubs']):,} indexed papers).
+- 🌟 **Highest Citation Impact:** **{top_cite_dept}** ({int(dept_stats.sort_values('cites', ascending=False).iloc[0]['cites']):,} total citations).
+- 🏆 **Most Q1 High-Impact Papers:** **{top_q1_dept}** ({int(dept_stats.sort_values('q1', ascending=False).iloc[0]['q1']):,} Q1 publications).
+
+| Department / School | Publications | Total Citations | Citations/Paper (CPP) | Q1 Papers |
+| :--- | :---: | :---: | :---: | :---: |
+""" + "\n".join(table_rows) + f"""
+
+💡 *Recommendation:* Foster joint interdisciplinary initiatives between **{top_dept}** and emerging computing/materials clusters.
+"""
+
+
+def get_department_detail_response(df: pd.DataFrame, kw: str, dept_full_name: str, total_pubs: int) -> str:
+    """Renders detailed research breakdown for a specific department."""
+    dept_df = df[df["department"].astype(str).str.lower().str.contains(kw, na=False)] if "department" in df.columns else pd.DataFrame()
+    if dept_df.empty:
+        return f"No publication data found for department matching '{dept_full_name}'."
+        
+    d_pubs = len(dept_df)
+    d_cites = int(dept_df["citations"].sum()) if "citations" in dept_df.columns else 0
+    d_cpp = round(d_cites / max(1, d_pubs), 2)
+    d_q1 = int((dept_df["quartile"] == "Q1").sum()) if "quartile" in dept_df.columns else 0
+    
+    top_auths = dept_df["primary_author"].value_counts().head(5) if "primary_author" in dept_df.columns else pd.Series()
+    auth_list = [f"- **{a}**: {c} papers" for a, c in top_auths.items()]
+    
+    top_papers = dept_df.sort_values("citations", ascending=False).head(3)
+    paper_list = [f"- **{r.get('title', 'N/A')}** ({r.get('year', 'N/A')}) — {int(r.get('citations', 0))} citations" for _, r in top_papers.iterrows()]
+    
+    return f"""### 🏛️ Department Research Insights: **{dept_full_name}**
+
+**Performance Overview:**
+- 📚 **Total Publications:** **{d_pubs:,} indexed papers** ({round(d_pubs/max(1, total_pubs)*100, 1)}% of COEP output)
+- 🌟 **Total Citations:** **{d_cites:,}**
+- 📈 **Citations Per Paper (CPP):** **{d_cpp}**
+- 🏆 **Q1 Publications:** **{d_q1:,}**
+
+**Leading Contributing Faculty in Department:**
+{chr(10).join(auth_list) if auth_list else 'N/A'}
+
+**Top Cited Papers from Department:**
+{chr(10).join(paper_list) if paper_list else 'N/A'}
+"""
+
+
 def run_analytical_copilot(prompt: str, df: pd.DataFrame, kpis: Dict[str, Any]) -> str:
     """
-    Intelligent built-in analytical engine that answers natural language research questions
+    Intelligent built-in analytical engine that accurately answers natural language research questions
     directly from pandas computations with zero API latency.
     """
     q = prompt.lower().strip()
@@ -138,44 +281,71 @@ def run_analytical_copilot(prompt: str, df: pd.DataFrame, kpis: Dict[str, Any]) 
     cpp = round(total_cites / max(1, total_pubs), 2)
     
     # 1. Accreditation / Executive / NIRF / NAAC Summary
-    if any(w in q for w in ["dossier", "executive", "nirf", "naac", "accreditation", "report", "overview", "summary"]):
+    if any(w in q for w in ["dossier", "executive", "nirf", "naac", "accreditation", "report", "overview", "briefing"]):
         return generate_executive_dossier(df, kpis)
-    
-    # 2. Department Rankings / Leaderboard
-    if any(w in q for w in ["department", "dept", "school", "branch", "ranking"]):
-        if "department" in df.columns and "citations" in df.columns:
-            dept_stats = df.groupby("department").agg(
-                pubs=("title", "count"),
-                cites=("citations", "sum"),
-                q1=("quartile", lambda x: (x == "Q1").sum())
-            ).reset_index()
-            dept_stats["cpp"] = (dept_stats["cites"] / dept_stats["pubs"]).round(2)
-            dept_stats = dept_stats.sort_values("pubs", ascending=False)
+        
+    # 2. General Author Rankings / Leaderboard ("who has most citations", "top authors")
+    if any(p in q for p in ["most cited", "top cited", "highest citation", "top author", "leading author", "top faculty", "highest publication", "most paper", "most document", "top contributor", "who has the most", "who is the top"]):
+        return get_top_authors_response(df)
+
+    # 3. Specific Author Name Lookup (Dr. Chaskar, Prof. Patil, etc.)
+    author_matches = search_specific_author(prompt, df)
+    if not author_matches.empty:
+        num_docs = len(author_matches)
+        auth_cites = int(author_matches["citations"].sum()) if "citations" in author_matches.columns else 0
+        auth_cpp = round(auth_cites / max(1, num_docs), 2)
+        
+        primary_name = author_matches["primary_author"].value_counts().index[0] if ("primary_author" in author_matches.columns and not author_matches["primary_author"].empty) else prompt.title()
+        depts = author_matches["department"].value_counts().index.tolist() if "department" in author_matches.columns else []
+        dept_str = ", ".join(depts[:2]) if depts else "COEP"
+        q1_docs = int((author_matches["quartile"] == "Q1").sum()) if "quartile" in author_matches.columns else 0
+        
+        top_p = author_matches.sort_values("citations", ascending=False).head(5)
+        p_rows = []
+        for _, r in top_p.iterrows():
+            p_rows.append(f"- 📄 **{r.get('title', 'N/A')}** ({r.get('year', 'N/A')})\n  *Journal:* {r.get('journal', 'N/A')} | **{int(r.get('citations', 0))} Citations** | Quartile: **{r.get('quartile', 'N/A')}**")
             
-            top_dept = dept_stats.iloc[0]["department"]
-            top_cite_dept = dept_stats.sort_values("cites", ascending=False).iloc[0]["department"]
-            top_q1_dept = dept_stats.sort_values("q1", ascending=False).iloc[0]["department"]
-            
-            table_rows = []
-            for i, r in dept_stats.head(10).iterrows():
-                table_rows.append(f"| **{r['department']}** | {int(r['pubs']):,} | {int(r['cites']):,} | {r['cpp']} | {int(r['q1']):,} |")
-                
-            return f"""### 🏛️ Departmental Research Leaderboard & Impact
+        return f"""### 👤 Faculty Research Profile: **{primary_name}**
 
-**Key Takeaways:**
-- 🥇 **Highest Volume Department:** **{top_dept}** ({int(dept_stats.iloc[0]['pubs']):,} indexed papers).
-- 🌟 **Highest Citation Impact:** **{top_cite_dept}** ({int(dept_stats.sort_values('cites', ascending=False).iloc[0]['cites']):,} total citations).
-- 🏆 **Most Q1 High-Impact Papers:** **{top_q1_dept}** ({int(dept_stats.sort_values('q1', ascending=False).iloc[0]['q1']):,} Q1 publications).
+**Summary Metrics:**
+- 📚 **Total Indexed Documents:** **{num_docs:,} publications**
+- 🌟 **Total Citations Accrued:** **{auth_cites:,} citations**
+- 📈 **Average Citations Per Paper (CPP):** **{auth_cpp}**
+- 🏆 **Q1 High-Impact Papers:** **{q1_docs}**
+- 🏛️ **Primary Department:** **{dept_str}**
 
-| Department / School | Publications | Total Citations | Citations/Paper (CPP) | Q1 Papers |
-| :--- | :---: | :---: | :---: | :---: |
-""" + "\n".join(table_rows) + f"""
+---
 
-💡 *Recommendation:* Encourage joint interdisciplinary projects between **{top_dept}** and emerging research groups to scale institutional Q1 output.
+#### 📑 Indexed Publications Breakdown:
+{chr(10).join(p_rows)}
 """
 
-    # 3. Quality & Quartile Distribution (Q1, Q2, Q3, Q4)
-    if any(w in q for w in ["q1", "q2", "q3", "q4", "quartile", "quality", "tier", "impact factor"]):
+    # 4. Department Queries
+    dept_keywords = {
+        "mechanical": "Mechanical Engineering",
+        "computer": "Computer Engineering & IT",
+        "electrical": "Electrical Engineering",
+        "civil": "Civil Engineering",
+        "metallurgy": "Metallurgy & Material Science",
+        "electronics": "Electronics & Telecommunication",
+        "entc": "Electronics & Telecommunication",
+        "instrumentation": "Instrumentation & Control",
+        "production": "Production & Industrial",
+        "applied science": "Applied Sciences, Physics & Chem",
+        "physics": "Applied Sciences, Physics & Chem",
+        "chemistry": "Applied Sciences, Physics & Chem",
+        "math": "Mathematics & Management"
+    }
+    
+    for kw, dept_full_name in dept_keywords.items():
+        if kw in q:
+            return get_department_detail_response(df, kw, dept_full_name, total_pubs)
+            
+    if any(w in q for w in ["department", "dept", "school", "branch", "ranking", "leaderboard", "leading"]):
+        return get_department_leaderboard_response(df)
+
+    # 5. Journal Quality & Quartiles (Q1, Q2, Q3, Q4)
+    if any(w in q for w in ["q1", "q2", "q3", "q4", "quartile", "quality", "tier", "impact factor", "citescore"]):
         if "quartile" in df.columns:
             q_counts = df["quartile"].value_counts()
             q1_c = int(q_counts.get("Q1", 0))
@@ -193,52 +363,22 @@ def run_analytical_copilot(prompt: str, df: pd.DataFrame, kpis: Dict[str, Any]) 
             return f"""### 🏆 Journal Quality & Quartile (Q1–Q4) Analysis
 
 **Quality Distribution:**
-- 🥇 **Q1 (Top 25% Journals):** **{q1_c:,}** publications (**{q1_pct}%** of all output)
+- 🥇 **Q1 (Top 25% High-Impact Journals):** **{q1_c:,}** publications (**{q1_pct}%** of all output)
 - 🥈 **Q2 (Top 50% Journals):** **{q2_c:,}** publications (**{q2_pct}%** of all output)
 - 🥉 **Q3 & Q4 Journals:** **{q3_c + q4_c:,}** publications
 
-| Tier | Publication Count | Proportion | Strategic Assessment |
+| Tier | Publication Count | Proportion | Strategic Impact |
 | :--- | :---: | :---: | :--- |
-| **Q1 (High Impact)** | {q1_c:,} | {q1_pct}% | Excellent institutional core; targeted for global ranking benchmarks |
-| **Q2 (Upper Mid)** | {q2_c:,} | {q2_pct}% | Strong pipeline for future Q1 upgrades |
-| **Q3 (Lower Mid)** | {q3_c:,} | {round(q3_c/max(1, total_pubs)*100, 1)}% | Solid peer-reviewed foundation |
-| **Q4 (Entry Tier)** | {q4_c:,} | {round(q4_c/max(1, total_pubs)*100, 1)}% | Transition opportunities |
+| **Q1 (High Impact)** | {q1_c:,} | {q1_pct}% | Core tier for NIRF/QS Ranking scores |
+| **Q2 (Upper Mid)** | {q2_c:,} | {q2_pct}% | Strong peer-reviewed pipeline |
+| **Q3 (Lower Mid)** | {q3_c:,} | {round(q3_c/max(1, total_pubs)*100, 1)}% | Solid technical contributions |
+| **Q4 (Entry Tier)** | {q4_c:,} | {round(q4_c/max(1, total_pubs)*100, 1)}% | Early-stage research foundation |
 
 **Top Cited Q1 Papers from COEP:**
 """ + "\n".join(p_list)
 
-    # 4. Top Authors & Faculty Intelligence
-    if any(w in q for w in ["author", "faculty", "professor", "researcher", "scientist", "who"]):
-        if "author" in df.columns:
-            auth_grp = df.groupby("author").agg(
-                pubs=("title", "count"),
-                cites=("citations", "sum"),
-                dept=("department", "first")
-            ).reset_index().sort_values("cites", ascending=False).head(8)
-            
-            rows = []
-            for i, r in auth_grp.iterrows():
-                cpp_auth = round(r["cites"] / max(1, r["pubs"]), 1)
-                rows.append(f"| **{r['author']}** | {r['dept']} | {int(r['pubs']):,} | {int(r['cites']):,} | {cpp_auth} |")
-                
-            top_auth = auth_grp.iloc[0]["author"]
-            top_pubs_auth = df["author"].value_counts().index[0]
-            
-            return f"""### 👥 Top Author & Faculty Research Intelligence
-
-**Faculty Highlights:**
-- 🌟 **Most Cited Researcher:** **{top_auth}** ({int(auth_grp.iloc[0]['cites']):,} citations)
-- 📚 **Highest Volume Contributor:** **{top_pubs_auth}** ({int(df['author'].value_counts().iloc[0]):,} papers)
-
-| Author / Faculty | Primary Department | Papers | Total Citations | CPP |
-| :--- | :--- | :---: | :---: | :---: |
-""" + "\n".join(rows) + f"""
-
-💡 *Note:* Citation counts reflect all indexed Scopus publications currently loaded in the dashboard repository.
-"""
-
-    # 5. Cross-Department & Multidisciplinary Collaborations
-    if any(w in q for w in ["collab", "international", "industry", "cross", "multidisciplinary", "partner"]):
+    # 6. Collaborations & Partnerships
+    if any(w in q for w in ["collab", "international", "industry", "cross", "multidisciplinary", "partner", "foreign", "team"]):
         intl = kpis.get("intl_collab", 0)
         ind = kpis.get("industry_collab", 0)
         return f"""### 🤝 Strategic Collaboration & Cross-Departmental Opportunities
@@ -246,17 +386,36 @@ def run_analytical_copilot(prompt: str, df: pd.DataFrame, kpis: Dict[str, Any]) 
 **Current Collaboration Metrics:**
 - 🌐 **International Co-authored Papers:** **{intl}**
 - 🏭 **Industry & Corporate Co-authored Papers:** **{ind}**
-- 🏛️ **Institutional Cross-Linkages:** Active collaborations across IISc, IITs, SPPU, and overseas universities.
+- 🏛️ **Institutional Linkages:** Active partnerships with global and national universities.
 
-**High-Potential Interdisciplinary Research Clusters for COEP:**
-1. **AI & Smart Manufacturing:** Joint initiative between *Computer Engineering*, *Mechanical*, and *Production Engineering*.
+**High-Potential Multidisciplinary Clusters for COEP:**
+1. **AI & Smart Manufacturing:** Joint research cluster between *Computer Engineering*, *Mechanical*, and *Production Engineering*.
 2. **Clean Energy & Battery Materials:** Collaborative cluster combining *Metallurgy & Material Science*, *Chemical*, and *Electrical Engineering*.
-3. **Smart Urban Infrastructure & IoT:** Multi-department cluster between *Civil Engineering*, *Electronics & Telecommunication*, and *Instrumentation*.
-
-💡 *Recommendation:* Establish targeted seed grants for inter-departmental collaborative proposals to maximize Q1 international co-authorship.
+3. **Smart Urban Infrastructure & IoT:** Multi-department initiative between *Civil Engineering*, *Electronics & Telecommunication*, and *Instrumentation*.
 """
 
-    # 6. Default Comprehensive Response
+    # 7. Topic / Keyword Search (e.g., Solar, AI, Robotics, Concrete, EV, Battery)
+    topic_words = [w for w in re.split(r'\s+', q) if len(w) >= 3 and w not in ["what", "how", "many", "papers", "about", "show", "find", "tell", "coep", "give", "the", "for", "and", "are"]]
+    if topic_words:
+        for tw in topic_words:
+            t_mask = df["title"].astype(str).str.lower().str.contains(tw, na=False) | df["abstract"].astype(str).str.lower().str.contains(tw, na=False)
+            topic_df = df[t_mask]
+            if not topic_df.empty and len(topic_df) < len(df) * 0.9:
+                t_count = len(topic_df)
+                t_cites = int(topic_df["citations"].sum()) if "citations" in topic_df.columns else 0
+                top_t_papers = topic_df.sort_values("citations", ascending=False).head(4)
+                p_list = [f"- **{r.get('title', 'N/A')}** ({r.get('year', 'N/A')})\n  *Journal:* {r.get('journal', 'N/A')} | **{int(r.get('citations', 0))} Citations** | Dept: **{r.get('department', 'N/A')}**" for _, r in top_t_papers.iterrows()]
+                
+                return f"""### 🔍 Research Topic Intelligence: **\"{tw.capitalize()}\"**
+
+- 📚 **Matching Publications:** **{t_count:,} indexed papers**
+- 🌟 **Cumulative Citations:** **{t_cites:,}**
+
+**Leading Papers on this Topic:**
+{chr(10).join(p_list)}
+"""
+
+    # 8. Default Overview
     return f"""### 🤖 COEP Research Intelligence Overview
 
 Based on the filtered Scopus dataset of **{total_pubs:,} indexed publications**:
@@ -265,11 +424,12 @@ Based on the filtered Scopus dataset of **{total_pubs:,} indexed publications**:
 - 🏆 **Quality Standard:** **{kpis.get('q1_count', 'N/A')} Q1 publications** represent COEP's highest tier global research impact.
 - 🌐 **Collaboration Reach:** **{kpis.get('intl_collab', 'N/A')} international** and **{kpis.get('industry_collab', 'N/A')} industry** joint publications.
 
-**Suggested Deep Dives:**
-- Ask: *\"Which department has the most Q1 papers?\"*
-- Ask: *\"Who are the top 5 cited authors in COEP?\"*
-- Ask: *\"Generate Executive NIRF/NAAC Summary\"*
-- Ask: *\"Identify cross-department collaboration opportunities\"*
+**Suggested Queries You Can Try:**
+- *\"Number of documents published by Dr. Chaskar\"*
+- *\"Who has the most citations in COEP?\"*
+- *\"Which department has the most Q1 publications?\"*
+- *\"Show research output for Mechanical Engineering\"*
+- *\"Find papers on Solar energy or Machine Learning\"*
 """
 
 
@@ -333,7 +493,7 @@ COEP Technological University demonstrates sustained research productivity and s
 def query_ai_copilot(prompt: str, df: pd.DataFrame, kpis: Dict[str, Any], chat_history: Optional[List[Dict[str, str]]] = None) -> str:
     """
     Unified query entry point:
-    Attempts Google Gemini API if key is present; gracefully falls back to the analytical engine.
+    Attempts Google Gemini API if key is present; gracefully falls back to the smart analytical engine.
     """
     api_key = get_gemini_api_key()
     
