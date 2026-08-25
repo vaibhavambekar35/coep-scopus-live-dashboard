@@ -4,12 +4,20 @@
 .env.*.local
 .streamlit/secrets.toml
 
-# Exclude temporary scratch and raw exports, permit repository dataset
+# Diagnostic & Test Artifacts
+*.png
+!assets/*.png
+video_frames/
+backup_*/
+diagnose_*.py
+verify_*.py
+
+# Temporary and Scratch Files
 *.tmp
 *.log
 !data/coep_scopus_cache.json
 
-# Python artifacts
+# Python & Virtual Environments
 __pycache__/
 *.py[cod]
 *$py.class
