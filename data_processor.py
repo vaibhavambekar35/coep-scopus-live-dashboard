@@ -643,5 +643,3 @@ def get_landmark_cited_papers(df: pd.DataFrame, top_n: int = 10) -> pd.DataFrame
     sorted_df.reset_index(drop=True, inplace=True)
     sorted_df["Rank"] = sorted_df.index + 1
     return sorted_df
-
-
