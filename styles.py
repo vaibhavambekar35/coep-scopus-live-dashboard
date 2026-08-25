@@ -1111,15 +1111,29 @@ def get_custom_css(theme: str = "dark") -> str:
         /* ========================================================= */
         @media (min-width: 769px) {{
             section[data-testid="stSidebar"],
+            section[data-testid="stSidebar"][aria-expanded="false"],
+            section[data-testid="stSidebar"][aria-expanded="true"],
             [data-testid="stSidebar"] {{
                 transform: none !important;
                 margin-left: 0 !important;
+                left: 0 !important;
                 min-width: 336px !important;
                 max-width: 336px !important;
                 width: 336px !important;
                 visibility: visible !important;
-                display: block !important;
+                display: flex !important;
+                flex-direction: column !important;
                 opacity: 1 !important;
+                position: relative !important;
+            }}
+
+            section[data-testid="stSidebar"] [data-testid="stSidebarContent"],
+            [data-testid="stSidebarContent"] {{
+                display: flex !important;
+                flex-direction: column !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+                width: 100% !important;
             }}
 
             /* Remove collapse button and sidebar header on desktop so sidebar is permanently locked open */

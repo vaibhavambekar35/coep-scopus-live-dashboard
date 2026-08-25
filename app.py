@@ -73,57 +73,51 @@ tab_text_color = "#94A3B8" if current_theme == "dark" else "#1E293B"
 tab_list_bg = "#0D1B2E" if current_theme == "dark" else "#F1F5F9"
 
 components.html(
-    f"""
+    """
     <script>
-        (function() {{
-            function enforceDesktopSidebar() {{
-                try {{
+        (function() {
+            function ensureSidebarOpen() {
+                try {
                     const p = window.parent || window;
                     const d = p.document || document;
                     if (!d) return;
-                    
-                    try {{
-                        p.localStorage.removeItem('st-sidebar-collapsed');
-                        p.localStorage.removeItem('stSidebarNavSeparatorState');
-                        p.localStorage.setItem('st-sidebar-expanded', 'true');
-                    }} catch(e) {{}}
 
-                    const width = p.innerWidth || d.documentElement.clientWidth || 1200;
-                    if (width > 768) {{
-                        const collapseEls = d.querySelectorAll('[data-testid="stSidebarHeader"], [data-testid="stSidebarCollapseButton"], button[data-testid="stBaseButton-headerNoPadding"], button[kind="headerNoPadding"]');
-                        collapseEls.forEach(el => {{
-                            el.style.setProperty('display', 'none', 'important');
-                            el.style.setProperty('visibility', 'hidden', 'important');
-                            el.style.setProperty('pointer-events', 'none', 'important');
-                            el.style.setProperty('height', '0px', 'important');
-                            el.style.setProperty('width', '0px', 'important');
-                            el.style.setProperty('opacity', '0', 'important');
-                        }});
-                        const expandBtn = d.querySelector('button[data-testid="stExpandSidebarButton"], [data-testid="collapsedControl"] button, [data-testid="collapsedControl"], button[aria-label="Expand sidebar"]');
-                        if (expandBtn) {{
+                    // Clear any saved collapse states so Streamlit always defaults to expanded
+                    try {
+                        p.localStorage.removeItem('st-sidebar-collapsed');
+                        p.sessionStorage.removeItem('st-sidebar-collapsed');
+                        p.localStorage.setItem('st-sidebar-expanded', 'true');
+                        window.localStorage.removeItem('st-sidebar-collapsed');
+                        window.sessionStorage.removeItem('st-sidebar-collapsed');
+                        window.localStorage.setItem('st-sidebar-expanded', 'true');
+                    } catch(e) {}
+
+                    const sidebar = d.querySelector('section[data-testid="stSidebar"]');
+                    const isCollapsed = !sidebar || sidebar.getAttribute('aria-expanded') === 'false';
+
+                    if (isCollapsed) {
+                        const expandBtn = d.querySelector('button[data-testid="stExpandSidebarButton"], [data-testid="collapsedControl"] button, button[aria-label="Expand sidebar"]');
+                        if (expandBtn) {
                             expandBtn.click();
-                        }}
-                    }}
-                }} catch(e) {{}}
-            }}
-            
-            enforceDesktopSidebar();
-            setInterval(enforceDesktopSidebar, 150);
-            
-            try {{
+                        }
+                    }
+                } catch(e) {}
+            }
+
+            ensureSidebarOpen();
+            setTimeout(ensureSidebarOpen, 100);
+            setTimeout(ensureSidebarOpen, 300);
+            setTimeout(ensureSidebarOpen, 800);
+            setTimeout(ensureSidebarOpen, 1500);
+
+            try {
                 const p = window.parent || window;
-                const d = p.document || document;
-                if (d && d.documentElement) {{
-                    const obs = new MutationObserver(enforceDesktopSidebar);
-                    obs.observe(d.documentElement, {{ childList: true, subtree: true, attributes: true }});
-                }}
-                if (p) {{
-                    p.addEventListener('resize', enforceDesktopSidebar);
-                    p.addEventListener('DOMContentLoaded', enforceDesktopSidebar);
-                    p.addEventListener('load', enforceDesktopSidebar);
-                }}
-            }} catch(e) {{}}
-        }})();
+                if (p) {
+                    p.addEventListener('load', ensureSidebarOpen);
+                    p.addEventListener('DOMContentLoaded', ensureSidebarOpen);
+                }
+            } catch(e) {}
+        })();
     </script>
     """,
     height=0
@@ -171,47 +165,6 @@ components.html(
                 pointer-events: none !important;
                 height: 0 !important;
                 min-height: 0 !important;
-            }}
-
-            button[data-testid="stExpandSidebarButton"],
-            [data-testid="collapsedControl"] button,
-            [data-testid="collapsedControl"],
-            div:has(> button[data-testid="stExpandSidebarButton"]) {{
-                position: fixed !important;
-                top: 12px !important;
-                left: 12px !important;
-                z-index: 999999 !important;
-                background: linear-gradient(135deg, #0284C7 0%, #0369A1 100%) !important;
-                background-color: #0284C7 !important;
-                color: #FFFFFF !important;
-                border-radius: 8px !important;
-                width: 38px !important;
-                height: 38px !important;
-                box-shadow: 0 4px 14px rgba(2, 132, 199, 0.45) !important;
-                border: 1px solid rgba(255,255,255,0.25) !important;
-                display: flex !important;
-                visibility: visible !important;
-                align-items: center !important;
-                justify-content: center !important;
-                pointer-events: auto !important;
-                cursor: pointer !important;
-                transition: all 0.2s ease-in-out !important;
-            }}
-
-            button[data-testid="stExpandSidebarButton"]:hover {{
-                background: linear-gradient(135deg, #0369A1 0%, #075985 100%) !important;
-                transform: scale(1.05) !important;
-                box-shadow: 0 6px 18px rgba(2, 132, 199, 0.6) !important;
-            }}
-
-            button[data-testid="stExpandSidebarButton"] *,
-            button[data-testid="stExpandSidebarButton"] svg,
-            button[data-testid="stExpandSidebarButton"] span {{
-                color: #FFFFFF !important;
-                -webkit-text-fill-color: #FFFFFF !important;
-                fill: #FFFFFF !important;
-                stroke: #FFFFFF !important;
-                pointer-events: none !important;
             }}
 
             .block-container {{
