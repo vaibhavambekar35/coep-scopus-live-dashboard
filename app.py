@@ -46,6 +46,11 @@ from styles import (
     get_plotly_theme,
     style_plotly_fig
 )
+from ai_copilot import (
+    query_ai_copilot,
+    generate_executive_dossier,
+    get_gemini_api_key
+)
 
 # Page configuration
 st.set_page_config(
@@ -894,15 +899,16 @@ with k_row2_5:
 st.markdown("<br>", unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# 6 CORE DASHBOARD SECTIONS IN TABS
+# 7 CORE DASHBOARD SECTIONS IN TABS
 # ---------------------------------------------------------
-tab_trends, tab_impact, tab_collab, tab_quality, tab_authors, tab_feed = st.tabs([
+tab_trends, tab_impact, tab_collab, tab_quality, tab_authors, tab_feed, tab_copilot = st.tabs([
     "📈 Publication Trends",
     "🎯 Research Impact",
     "🌐 Collaboration",
     "🏆 Research Quality",
     "👥 Author Intelligence",
-    "📰 Live Publication Feed"
+    "📰 Live Publication Feed",
+    "🤖 AI Research Copilot"
 ])
 
 # ---------------------------------------------------------
@@ -1823,6 +1829,98 @@ with tab_feed:
                     st.write(f"**Affiliated Institutions:** {', '.join(item.get('collaborating_institutions'))}")
                 if item.get("collaborating_countries"):
                     st.write(f"**Partner Countries:** {', '.join(item.get('collaborating_countries'))}")
+
+# ---------------------------------------------------------
+# TAB 7: AI RESEARCH COPILOT & CHATBOT
+# ---------------------------------------------------------
+with tab_copilot:
+    gemini_active = bool(get_gemini_api_key())
+    engine_badge = "⚡ Powered by Google Gemini AI" if gemini_active else "🧠 Powered by COEP Analytical Intelligence Engine"
+    
+    st.markdown(f"""
+    <div class="ai-copilot-header">
+        <div>
+            <div class="ai-badge-title">🤖 COEP AI Research Copilot & Assistant</div>
+            <div class="ai-badge-sub">Natural language research queries, accreditation briefings & strategic cross-department insights</div>
+        </div>
+        <div style="font-size: 0.8rem; font-weight: 700; color: {'#38BDF8' if current_theme == 'dark' else '#0284C7'}; background: {'rgba(2, 132, 199, 0.2)' if current_theme == 'dark' else '#DBEAFE'}; padding: 6px 12px; border-radius: 8px; border: 1px solid {'#0284C7' if current_theme == 'dark' else '#93C5FD'};">
+            {engine_badge}
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # 1-Click Action Row
+    st.markdown('<div class="ai-quick-prompts-label">⚡ Quick Research Actions & Insight Prompts</div>', unsafe_allow_html=True)
+    
+    c_btn1, c_btn2, c_btn3, c_btn4, c_btn5 = st.columns(5)
+    
+    prompt_to_run = None
+    
+    with c_btn1:
+        if st.button("📊 Executive Dossier", key="ai_btn_dossier", help="Generate full NIRF/NAAC executive report", use_container_width=True):
+            prompt_to_run = "Generate a comprehensive Executive Research Dossier for COEP NIRF and NAAC accreditation reviews."
+            
+    with c_btn2:
+        if st.button("🏛️ Dept Rankings", key="ai_btn_dept", help="Rank departments by publications, citations, and Q1 output", use_container_width=True):
+            prompt_to_run = "Which departments lead in publication volume, citation impact, and Q1 publications?"
+            
+    with c_btn3:
+        if st.button("🏆 Q1 Quality Analysis", key="ai_btn_q1", help="Analyze journal quality, Q1-Q4 tiers and landmark papers", use_container_width=True):
+            prompt_to_run = "Analyze COEP's journal quality distribution across Q1, Q2, Q3, Q4 and highlight top cited Q1 papers."
+            
+    with c_btn4:
+        if st.button("👥 Top Authors", key="ai_btn_authors", help="Identify leading researchers and high-impact faculty", use_container_width=True):
+            prompt_to_run = "Who are the top cited authors and highest volume contributing faculty across departments?"
+            
+    with c_btn5:
+        if st.button("🤝 Interdisciplinary Teams", key="ai_btn_collab", help="Identify cross-department research clusters", use_container_width=True):
+            prompt_to_run = "Suggest high-potential cross-departmental and multidisciplinary collaborative research clusters for COEP."
+            
+    st.markdown("<div style='margin-bottom: 14px;'></div>", unsafe_allow_html=True)
+    
+    # Initialize chat history in session_state
+    if "ai_chat_messages" not in st.session_state or not st.session_state["ai_chat_messages"]:
+        cites_total = int(df_filtered['citations'].sum() if 'citations' in df_filtered.columns else 0)
+        st.session_state["ai_chat_messages"] = [
+            {
+                "role": "assistant",
+                "content": f"👋 **Hello! I am your COEP Research Intelligence Copilot.**\n\nI have loaded the active dataset of **{len(df_filtered):,} indexed Scopus publications** with **{cites_total:,} cumulative citations**.\n\nYou can click any quick prompt button above or ask any question below in natural language."
+            }
+        ]
+        
+    # Handle user text input or quick prompt button
+    user_input = st.chat_input("Ask anything about COEP publications, faculty, departments, or research quality...")
+    
+    selected_prompt = prompt_to_run if prompt_to_run else user_input
+        
+    if selected_prompt:
+        st.session_state["ai_chat_messages"].append({"role": "user", "content": selected_prompt})
+        with st.spinner("🤖 Copilot is analyzing Scopus dataset..."):
+            response_text = query_ai_copilot(selected_prompt, df_filtered, kpis, chat_history=st.session_state["ai_chat_messages"])
+            st.session_state["ai_chat_messages"].append({"role": "assistant", "content": response_text})
+            
+    # Display Chat History
+    for msg in st.session_state["ai_chat_messages"]:
+        with st.chat_message(msg["role"], avatar="🎓" if msg["role"] == "user" else "🤖"):
+            st.markdown(msg["content"])
+            
+    # Utility row: Clear chat & Export Dossier
+    st.markdown("<br>", unsafe_allow_html=True)
+    col_clear, col_space, col_exp = st.columns([1.5, 2.5, 2])
+    with col_clear:
+        if st.button("🗑️ Clear Chat History", key="ai_clear_chat", use_container_width=True):
+            st.session_state["ai_chat_messages"] = []
+            st.rerun()
+    with col_exp:
+        dossier_text = generate_executive_dossier(df_filtered, kpis)
+        st.download_button(
+            label="📥 Download Executive Report (.md)",
+            data=dossier_text,
+            file_name=f"COEP_Scopus_Executive_Dossier_{datetime.date.today().strftime('%Y%m%d')}.md",
+            mime="text/markdown",
+            key="ai_download_dossier",
+            use_container_width=True
+        )
 
 # ---------------------------------------------------------
 # Post-Render Sidebar State Enforcement (Desktop: Always Open, Mobile: Collapsed)

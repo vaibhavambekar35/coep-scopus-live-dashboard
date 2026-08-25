@@ -1346,6 +1346,72 @@ def get_custom_css(theme: str = "dark") -> str:
             .icare-kpi-value {{
                 font-size: 1.35rem !important;
             }}
+        /* ========================================================= */
+        /* AI RESEARCH COPILOT & CHATBOT STYLES */
+        /* ========================================================= */
+        .ai-copilot-header {{
+            background: {'linear-gradient(135deg, rgba(2, 132, 199, 0.18) 0%, rgba(14, 30, 54, 0.75) 100%)' if is_dark else 'linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)'};
+            border: 1px solid {'#0284C7' if is_dark else '#93C5FD'};
+            border-radius: 14px;
+            padding: 18px 22px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }}
+
+        .ai-badge-title {{
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: {'#FFFFFF' if is_dark else '#0F172A'};
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }}
+
+        .ai-badge-sub {{
+            font-size: 0.82rem;
+            color: {'#38BDF8' if is_dark else '#0284C7'};
+            font-weight: 600;
+            margin-top: 2px;
+        }}
+
+        .ai-quick-prompts-label {{
+            font-size: 0.82rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: {'#94A3B8' if is_dark else '#64748B'};
+            margin-bottom: 8px;
+        }}
+
+        /* Streamlit Chat Elements Theme Overrides */
+        [data-testid="stChatMessage"] {{
+            background-color: {'#0D1B2E' if is_dark else '#FFFFFF'} !important;
+            border: 1px solid {'#1E3250' if is_dark else '#E2E8F0'} !important;
+            border-radius: 12px !important;
+            padding: 14px 18px !important;
+            margin-bottom: 12px !important;
+            box-shadow: {'0 4px 12px rgba(0,0,0,0.25)' if is_dark else '0 2px 8px rgba(0,0,0,0.05)'} !important;
+        }}
+
+        [data-testid="stChatMessage"] [data-testid="stMarkdownContainer"] {{
+            color: {'#F8FAFC' if is_dark else '#0F172A'} !important;
+            font-size: 0.95rem !important;
+            line-height: 1.6 !important;
+        }}
+
+        [data-testid="stChatInput"] {{
+            background-color: {'#0E1E36' if is_dark else '#FFFFFF'} !important;
+            border-color: {'#1E3A5F' if is_dark else '#CBD5E1'} !important;
+            border-radius: 12px !important;
+        }}
+
+        [data-testid="stChatInput"] textarea {{
+            color: {'#FFFFFF' if is_dark else '#0F172A'} !important;
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
         }}
     </style>
     """
