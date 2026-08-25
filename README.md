@@ -1,3 +1,4 @@
+<!-- COEP Scopus Live Dashboard -->
 # 🏛️ COEP Scopus Live Research Dashboard
 
 An interactive, live institutional bibliometrics and research intelligence dashboard for **COEP (COEP Technological University, Pune / College of Engineering Pune)** powered by the **Elsevier Scopus API** and **Streamlit**.

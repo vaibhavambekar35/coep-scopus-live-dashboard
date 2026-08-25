@@ -1,3 +1,4 @@
+# COEP Scopus Live Dashboard - Production Release
 """
 COEP Scopus Research Dashboard | ICARE Portal Intelligence Edition
 Dual Theme (Dark & Light Mode), Top 10 KPIs, Publication Trends, Impact,

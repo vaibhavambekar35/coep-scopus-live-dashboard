@@ -1,3 +1,4 @@
+# COEP Scopus Live Dashboard - Production Release
 """
 Realistic COEP (COEP Technological University, Pune) Scopus Benchmark Dataset Generator.
 Provides an authentic baseline dataset for testing and immediate dashboard demonstration

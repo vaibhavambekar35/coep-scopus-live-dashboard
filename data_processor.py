@@ -1,3 +1,4 @@
+# COEP Scopus Live Dashboard - Production Release
 """
 Data Processing and KPI Calculation Module for COEP Scopus Dashboard.
 Computes all 10 Top KPIs, Trend Analytics, Research Impact, Collaboration Stats,

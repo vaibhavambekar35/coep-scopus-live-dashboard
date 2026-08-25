@@ -1,3 +1,4 @@
+# COEP Scopus Live Dashboard - Production Release
 """
 Scopus API Client Module for COEP Research Dashboard.
 Handles Elsevier Scopus Search API querying, pagination, rate limiting,
