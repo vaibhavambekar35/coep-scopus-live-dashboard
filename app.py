@@ -492,7 +492,7 @@ with st.sidebar:
     </div>
     """, unsafe_allow_html=True)
 
-    def refresh_entire_dashboard():
+    def reset_entire_dashboard():
         cached_data, _ = load_cache("data/coep_scopus_cache.json")
         if cached_data:
             st.session_state["publications_data"] = cached_data
@@ -503,13 +503,14 @@ with st.sidebar:
         st.session_state["input_start_yr"] = "1950"
         st.session_state["input_end_yr"] = "2026"
         st.session_state["filter_version"] = st.session_state.get("filter_version", 0) + 1
+        st.session_state["ai_chat_messages"] = []
 
     st.button(
-        "🔄 Refresh Dashboard",
+        "🔄 Reset Dashboard",
         use_container_width=True,
         type="primary",
-        key="btn_refresh_all_dashboard",
-        on_click=refresh_entire_dashboard
+        key="btn_reset_all_dashboard",
+        on_click=reset_entire_dashboard
     )
 
     is_dark = current_theme == "dark"
