@@ -268,11 +268,8 @@ class ScopusAPIClient:
         
         # Publication Date & Year
         cover_date_str = str(entry.get("prism:coverDate") or "2025-01-01").strip()
-        today = datetime.date(2026, 8, 24)
         try:
             pub_date = datetime.datetime.strptime(cover_date_str[:10], "%Y-%m-%d").date()
-            if pub_date > today:
-                pub_date = today
             year = pub_date.year
             month_name = pub_date.strftime("%B")
             month_num = pub_date.month
