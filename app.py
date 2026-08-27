@@ -117,9 +117,25 @@ components.html(
 
             try {
                 const p = window.parent || window;
+                const d = p.document || document;
                 if (p) {
                     p.addEventListener('load', ensureSidebarOpen);
                     p.addEventListener('DOMContentLoaded', ensureSidebarOpen);
+                }
+                if (d) {
+                    d.addEventListener('click', function(e) {
+                        const btn = e.target.closest('button');
+                        if (btn && (btn.innerText.includes('Print Dashboard') || btn.innerText.includes('Print Page'))) {
+                            setTimeout(() => {
+                                try {
+                                    if (p && p.print) p.print();
+                                    else window.print();
+                                } catch(err) {
+                                    window.print();
+                                }
+                            }, 120);
+                        }
+                    }, true);
                 }
             } catch(e) {}
         })();
@@ -795,8 +811,27 @@ with col_tool3:
     st.download_button("📑 Export BibTeX", data=bibtex_str, file_name=f"COEP_Scopus_{datetime.date.today()}.bib", mime="text/plain", type="primary", use_container_width=True)
 
 with col_tool4:
-    csv_bytes = df_filtered.drop(columns=["abstract", "pub_date_dt"], errors="ignore").to_csv(index=False).encode('utf-8')
-    st.download_button("📥 Export CSV", data=csv_bytes, file_name=f"COEP_Scopus_Data_{datetime.date.today()}.csv", mime="text/csv", type="primary", use_container_width=True)
+    print_clicked = st.button("🖨️ Print Dashboard", key="btn_print_dashboard", type="primary", use_container_width=True)
+    if print_clicked:
+        components.html(
+            """
+            <script>
+                setTimeout(() => {
+                    try {
+                        const p = window.parent || window;
+                        if (p && p.print) {
+                            p.print();
+                        } else {
+                            window.print();
+                        }
+                    } catch(e) {
+                        window.print();
+                    }
+                }, 150);
+            </script>
+            """,
+            height=0
+        )
 
 st.markdown("<br>", unsafe_allow_html=True)
 
