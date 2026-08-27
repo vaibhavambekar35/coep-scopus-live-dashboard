@@ -1418,6 +1418,34 @@ def get_custom_css(theme: str = "dark") -> str:
             color: {'#FFFFFF' if is_dark else '#0F172A'} !important;
             font-family: 'Plus Jakarta Sans', sans-serif !important;
         }}
+
+        /* ========================================================= */
+        /* PRINT MEDIA OPTIMIZATIONS (Page-as-it-is Print) */
+        /* ========================================================= */
+        @media print {{
+            * {{
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
+            }}
+            header[data-testid="stHeader"],
+            footer,
+            #MainMenu,
+            .stDeployButton,
+            button[data-testid="stExpandSidebarButton"],
+            section[data-testid="stSidebar"] {{
+                display: none !important;
+            }}
+            .main .block-container {{
+                padding: 12px 16px !important;
+                margin: 0 !important;
+                max-width: 100% !important;
+            }}
+            .icare-topbar, .icare-hero, .icare-kpi-card, .icare-section-title, .stPlotlyChart, .icare-feed-card {{
+                break-inside: avoid !important;
+                page-break-inside: avoid !important;
+            }}
+        }}
     </style>
     """
 
