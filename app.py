@@ -1436,13 +1436,17 @@ with tab_quality:
                             r=vals,
                             theta=radar_categories + [radar_categories[0]],
                             fill="toself",
-                            name=d_name
+                            name=d_name,
+                            line=dict(width=2)
                         ))
                 fig_radar.update_layout(
-                    polar=dict(radialaxis=dict(visible=True, range=[0, 100])),
-                    height=360,
-                    margin=dict(l=25, r=25, t=25, b=25),
-                    legend=dict(orientation="h", yanchor="bottom", y=-0.25, xanchor="center", x=0.5)
+                    polar=dict(
+                        radialaxis=dict(visible=True, range=[0, 100], showticklabels=True),
+                        angularaxis=dict(tickfont=dict(size=11, color="#FFFFFF" if current_theme == "dark" else "#0F172A"))
+                    ),
+                    height=420,
+                    margin=dict(l=30, r=30, t=25, b=60),
+                    legend=dict(orientation="h", yanchor="top", y=-0.15, xanchor="center", x=0.5)
                 )
                 fig_radar = style_plotly_fig(fig_radar, current_theme)
                 st.plotly_chart(fig_radar, theme=None, use_container_width=True)
@@ -1456,15 +1460,31 @@ with tab_quality:
                 size="Q1 %",
                 color="Department",
                 hover_name="Department",
-                hover_data=["Total Citations", "Q1 Papers", "Active Faculty", "h-Index"],
-                text="Department",
-                labels={"Publications": "Total Publications (Volume)", "CPP": "Citations per Publication (CPP)"}
+                custom_data=["Q1 %", "h-Index", "Active Faculty", "Total Citations"],
+                labels={"Publications": "Total Publications (Volume)", "CPP": "Citations per Publication (CPP)"},
+                size_max=30
             )
-            fig_bubble.update_traces(textposition="top center")
+            fig_bubble.update_traces(
+                hovertemplate="<b>%{hovertext}</b><br><br>" +
+                              "📚 Publications: <b>%{x:,}</b><br>" +
+                              "⭐ Citations / Paper: <b>%{y:.2f}</b><br>" +
+                              "🥇 Q1 Ratio: <b>%{customdata[0]:.1f}%</b><br>" +
+                              "📈 Department h-Index: <b>%{customdata[1]}</b><br>" +
+                              "👥 Active Faculty: <b>%{customdata[2]}</b><extra></extra>"
+            )
+            avg_cpp_val = kpis.get("citations_per_pub", 9.54)
+            fig_bubble.add_hline(
+                y=avg_cpp_val,
+                line_dash="dash",
+                line_color="#F59E0B",
+                annotation_text=f"COEP Avg CPP ({avg_cpp_val})",
+                annotation_position="top left",
+                annotation_font=dict(size=11, color="#F59E0B")
+            )
             fig_bubble.update_layout(
-                height=360,
-                margin=dict(l=20, r=20, t=20, b=20),
-                showlegend=False
+                height=420,
+                margin=dict(l=20, r=20, t=25, b=60),
+                legend=dict(orientation="h", yanchor="top", y=-0.25, xanchor="center", x=0.5)
             )
             fig_bubble = style_plotly_fig(fig_bubble, current_theme)
             st.plotly_chart(fig_bubble, theme=None, use_container_width=True)
