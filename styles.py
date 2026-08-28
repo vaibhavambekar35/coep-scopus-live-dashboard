@@ -1403,47 +1403,106 @@ def get_custom_css(theme: str = "dark") -> str:
         }}
 
         [data-testid="stChatMessage"] [data-testid="stMarkdownContainer"] {{
-            color: {'#F8FAFC' if is_dark else '#0F172A'} !important;
-            font-size: 0.95rem !important;
-            line-height: 1.6 !important;
-        }}
-
-        [data-testid="stChatInput"] {{
-            background-color: {'#0E1E36' if is_dark else '#FFFFFF'} !important;
-            border-color: {'#1E3A5F' if is_dark else '#CBD5E1'} !important;
-            border-radius: 12px !important;
-        }}
-
-        [data-testid="stChatInput"] textarea {{
-            color: {'#FFFFFF' if is_dark else '#0F172A'} !important;
-            font-family: 'Plus Jakarta Sans', sans-serif !important;
-        }}
-
-        /* ========================================================= */
-        /* PRINT MEDIA OPTIMIZATIONS (Page-as-it-is Print) */
-        /* ========================================================= */
-        @media print {{
-            * {{
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-                color-adjust: exact !important;
+                line-height: 1.6 !important;
             }}
-            header[data-testid="stHeader"],
-            footer,
-            #MainMenu,
-            .stDeployButton,
-            button[data-testid="stExpandSidebarButton"],
-            section[data-testid="stSidebar"] {{
-                display: none !important;
+
+            [data-testid="stChatInput"] {{
+                background-color: {'#0E1E36' if is_dark else '#FFFFFF'} !important;
+                border-color: {'#1E3A5F' if is_dark else '#CBD5E1'} !important;
+                border-radius: 12px !important;
             }}
-            .main .block-container {{
-                padding: 12px 16px !important;
-                margin: 0 !important;
-                max-width: 100% !important;
+
+            [data-testid="stChatInput"] textarea {{
+                color: {'#FFFFFF' if is_dark else '#0F172A'} !important;
+                font-family: 'Plus Jakarta Sans', sans-serif !important;
             }}
-            .icare-topbar, .icare-hero, .icare-kpi-card, .icare-section-title, .stPlotlyChart, .icare-feed-card {{
-                break-inside: avoid !important;
-                page-break-inside: avoid !important;
+
+            /* ========================================================= */
+            /* EXECUTIVE BRIEFING & BENCHMARK STYLES */
+            /* ========================================================= */
+            .executive-briefing-box {{
+                background: {'linear-gradient(180deg, #0D1B2E 0%, #08111E 100%)' if is_dark else 'linear-gradient(180deg, #F8FAFC 0%, #FFFFFF 100%)'};
+                border: 1px solid {'#1E3A5F' if is_dark else '#CBD5E1'};
+                border-radius: 16px;
+                padding: 24px;
+                margin-bottom: 24px;
+                box-shadow: {'0 8px 30px rgba(0, 0, 0, 0.4)' if is_dark else '0 4px 20px rgba(0, 0, 0, 0.08)'};
+            }}
+
+            .executive-header {{
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                border-bottom: 2px solid {'#1E3A5F' if is_dark else '#E2E8F0'};
+                padding-bottom: 16px;
+                margin-bottom: 20px;
+                flex-wrap: wrap;
+                gap: 12px;
+            }}
+
+            .executive-title {{
+                font-size: 1.45rem;
+                font-weight: 800;
+                color: {'#FFFFFF' if is_dark else '#0F172A'};
+                letter-spacing: -0.02em;
+            }}
+
+            .executive-grid {{
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+                gap: 14px;
+                margin-bottom: 22px;
+            }}
+
+            .executive-stat-card {{
+                background: {'rgba(15, 23, 42, 0.6)' if is_dark else '#F1F5F9'};
+                border: 1px solid {'rgba(255, 255, 255, 0.08)' if is_dark else '#E2E8F0'};
+                border-radius: 10px;
+                padding: 12px 14px;
+                text-align: center;
+            }}
+
+            .executive-stat-val {{
+                font-size: 1.35rem;
+                font-weight: 800;
+                color: {'#38BDF8' if is_dark else '#0284C7'};
+            }}
+
+            .executive-stat-lbl {{
+                font-size: 0.75rem;
+                font-weight: 700;
+                color: {'#94A3B8' if is_dark else '#64748B'};
+                text-transform: uppercase;
+                letter-spacing: 0.04em;
+                margin-top: 2px;
+            }}
+
+            /* ========================================================= */
+            /* PRINT MEDIA OPTIMIZATIONS (Page-as-it-is Print) */
+            /* ========================================================= */
+            @media print {{
+                * {{
+                    -webkit-print-color-adjust: exact !important;
+                    print-color-adjust: exact !important;
+                    color-adjust: exact !important;
+                }}
+                header[data-testid="stHeader"],
+                footer,
+                #MainMenu,
+                .stDeployButton,
+                button[data-testid="stExpandSidebarButton"],
+                section[data-testid="stSidebar"] {{
+                    display: none !important;
+                }}
+                .main .block-container {{
+                    padding: 12px 16px !important;
+                    margin: 0 !important;
+                    max-width: 100% !important;
+                }}
+                .icare-topbar, .icare-hero, .icare-kpi-card, .icare-section-title, .stPlotlyChart, .icare-feed-card, .executive-briefing-box {{
+                    break-inside: avoid !important;
+                    page-break-inside: avoid !important;
+                }}
             }}
         }}
     </style>
