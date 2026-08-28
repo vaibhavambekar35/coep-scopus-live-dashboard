@@ -1499,12 +1499,31 @@ def get_custom_css(theme: str = "dark") -> str:
                     margin: 0 !important;
                     max-width: 100% !important;
                 }}
-                .icare-topbar, .icare-hero, .icare-kpi-card, .icare-section-title, .stPlotlyChart, .icare-feed-card, .executive-briefing-box {{
+                .icare-topbar, .icare-hero, .icare-kpi-card, .icare-section-title, .stPlotlyChart, .icare-feed-card, .executive-briefing-box {
                     break-inside: avoid !important;
                     page-break-inside: avoid !important;
-                }}
-            }}
-        }}
+                }
+
+                /* Targeted Author Profile Print Isolation */
+                body.print-author-only-mode .icare-topbar,
+                body.print-author-only-mode .icare-hero,
+                body.print-author-only-mode .report-toolbar-box,
+                body.print-author-only-mode .podium-card,
+                body.print-author-only-mode .tab5-top-leaderboard,
+                body.print-author-only-mode div[data-testid="stTabs"] > div:first-child,
+                body.print-author-only-mode div[data-baseweb="tab-list"],
+                body.print-author-only-mode [data-testid="stSelectbox"],
+                body.print-author-only-mode [data-testid="stButton"],
+                body.print-author-only-mode [data-testid="stDownloadButton"],
+                body.print-author-only-mode [data-testid="stRadio"] {
+                    display: none !important;
+                }
+                body.print-author-only-mode .author-print-banner {
+                    display: block !important;
+                    margin-bottom: 20px !important;
+                }
+            }
+        }
     </style>
     """
 
