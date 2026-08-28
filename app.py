@@ -7,8 +7,10 @@ Collaboration Maps, Quality Metrics (Q1-Q4), and Live Searchable Feed.
 
 import os
 import io
+import base64
 import datetime
 import streamlit as st
+import streamlit.components.v1 as components
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
@@ -131,28 +133,7 @@ components.html(
                         const btn = e.target.closest('button');
                         if (btn) {
                             const btnText = btn.innerText || '';
-                            if (btnText.includes('Print Author') || btnText.includes('Print Profile')) {
-                                const targetBody = (p.document || document).body;
-                                targetBody.classList.add('print-author-only-mode');
-                                const cleanup = function() {
-                                    targetBody.classList.remove('print-author-only-mode');
-                                    p.removeEventListener('afterprint', cleanup);
-                                    window.removeEventListener('afterprint', cleanup);
-                                };
-                                p.addEventListener('afterprint', cleanup);
-                                window.addEventListener('afterprint', cleanup);
-                                setTimeout(() => {
-                                    try {
-                                        if (p && p.print) p.print();
-                                        else window.print();
-                                    } catch(err) {
-                                        window.print();
-                                    }
-                                    setTimeout(cleanup, 2000);
-                                }, 150);
-                            } else if (btnText.includes('Print Dashboard') || btnText.includes('Print Page')) {
-                                const targetBody = (p.document || document).body;
-                                targetBody.classList.remove('print-author-only-mode');
+                            if (btnText.includes('Print Dashboard') || btnText.includes('Print Page')) {
                                 setTimeout(() => {
                                     try {
                                         if (p && p.print) p.print();
@@ -1721,38 +1702,39 @@ with tab_authors:
                 f"""
                 <script>
                     (function() {{
-                        const b64 = "{b64_rep}";
-                        const html = decodeURIComponent(escape(window.atob(b64)));
-                        const pWin = window.open('', '_blank');
-                        if (pWin) {{
-                            pWin.document.open();
-                            pWin.document.write(html);
-                            pWin.document.close();
-                            pWin.focus();
-                            setTimeout(() => {{
-                                pWin.print();
-                            }}, 400);
-                        }} else {{
-                            let frame = window.parent.document.getElementById('author-print-isolated-frame');
-                            if (!frame) {{
-                                frame = window.parent.document.createElement('iframe');
-                                frame.id = 'author-print-isolated-frame';
-                                frame.style.position = 'fixed';
-                                frame.style.right = '0';
-                                frame.style.bottom = '0';
-                                frame.style.width = '0';
-                                frame.style.height = '0';
-                                frame.style.border = '0';
-                                window.parent.document.body.appendChild(frame);
+                        try {{
+                            const b64 = "{b64_rep}";
+                            const html = decodeURIComponent(escape(window.atob(b64)));
+                            const parentDoc = (window.parent && window.parent.document) ? window.parent.document : document;
+                            let frame = parentDoc.getElementById('author-print-isolated-frame');
+                            if (frame) {{
+                                try {{ frame.remove(); }} catch(e) {{}}
                             }}
+                            frame = parentDoc.createElement('iframe');
+                            frame.id = 'author-print-isolated-frame';
+                            frame.style.position = 'fixed';
+                            frame.style.right = '0';
+                            frame.style.bottom = '0';
+                            frame.style.width = '0';
+                            frame.style.height = '0';
+                            frame.style.border = '0';
+                            parentDoc.body.appendChild(frame);
+
                             const doc = frame.contentWindow.document;
                             doc.open();
                             doc.write(html);
                             doc.close();
-                            frame.contentWindow.focus();
+
                             setTimeout(() => {{
-                                frame.contentWindow.print();
-                            }}, 400);
+                                try {{
+                                    frame.contentWindow.focus();
+                                    frame.contentWindow.print();
+                                }} catch(err) {{
+                                    console.error(err);
+                                }}
+                            }}, 350);
+                        }} catch(e) {{
+                            console.error(e);
                         }}
                     }})();
                 </script>
