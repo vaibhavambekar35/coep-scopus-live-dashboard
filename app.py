@@ -2137,23 +2137,11 @@ with tab_copilot:
         with st.chat_message(msg["role"], avatar="🎓" if msg["role"] == "user" else "🤖"):
             st.markdown(msg["content"])
             
-    # Utility row: Clear chat & Export Dossier
+    # Utility row: Clear chat
     st.markdown("<br>", unsafe_allow_html=True)
-    col_clear, col_space, col_exp = st.columns([1.5, 2.5, 2])
-    with col_clear:
-        if st.button("🗑️ Clear Chat History", key="ai_clear_chat", use_container_width=True):
-            st.session_state["ai_chat_messages"] = []
-            st.rerun()
-    with col_exp:
-        dossier_text = generate_executive_dossier(df_filtered, kpis)
-        st.download_button(
-            label="📥 Download Executive Report (.md)",
-            data=dossier_text,
-            file_name=f"COEP_Scopus_Executive_Dossier_{datetime.date.today().strftime('%Y%m%d')}.md",
-            mime="text/markdown",
-            key="ai_download_dossier",
-            use_container_width=True
-        )
+    if st.button("🗑️ Clear Chat History", key="ai_clear_chat"):
+        st.session_state["ai_chat_messages"] = []
+        st.rerun()
 
 # ---------------------------------------------------------
 # Post-Render Sidebar State Enforcement (Desktop: Always Open, Mobile: Collapsed)
