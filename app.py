@@ -804,7 +804,7 @@ st.html(render_icare_hero(kpis['total_publications'], kpis['total_citations'], t
 # ---------------------------------------------------------
 # REPORT TOOLBAR & EXPORT ACTION BUTTONS
 # ---------------------------------------------------------
-col_tool1, col_tool2, col_tool3, col_tool4, col_tool5 = st.columns([2.2, 1, 1, 1.2, 1])
+col_tool1, col_tool2, col_tool3, col_tool4 = st.columns([3.2, 1.1, 1.1, 1.2])
 
 with col_tool1:
     st.markdown('<div class="toolbar-title">📄 <strong>REPORT: COEP Live Scopus Intelligence Dashboard Overview</strong></div>', unsafe_allow_html=True)
@@ -820,9 +820,6 @@ with col_tool3:
     st.download_button("📑 Export BibTeX", data=bibtex_str, file_name=f"COEP_Scopus_{datetime.date.today()}.bib", mime="text/plain", type="primary", use_container_width=True)
 
 with col_tool4:
-    show_exec = st.checkbox("📋 Executive One-Pager", value=False, key="chk_exec_summary")
-
-with col_tool5:
     print_clicked = st.button("🖨️ Print Dashboard", key="btn_print_dashboard", type="primary", use_container_width=True)
     if print_clicked:
         components.html(
@@ -844,50 +841,6 @@ with col_tool5:
             """,
             height=0
         )
-
-if show_exec:
-    st.markdown(f"""
-    <div class="executive-briefing-box">
-        <div class="executive-header">
-            <div>
-                <div class="executive-title">🏛️ COEP Technological University — Executive Research Summary</div>
-                <div style="font-size: 0.85rem; color: {'#38BDF8' if current_theme == 'dark' else '#0284C7'}; font-weight: 700;">
-                    Official Institutional Scopus Dossier [IR-E-U-0447] • NAAC A+ (3.42) • Evaluation Period: {selected_year_range[0]}–{selected_year_range[1]}
-                </div>
-            </div>
-            <div style="font-size: 0.8rem; color: {'#94A3B8' if current_theme == 'dark' else '#64748B'}; text-align: right;">
-                <strong>Generated On:</strong> {datetime.date.today().strftime('%B %d, %Y')}<br>
-                <strong>Data Source:</strong> Elsevier Scopus Live Database
-            </div>
-        </div>
-        <div class="executive-grid">
-            <div class="executive-stat-card">
-                <div class="executive-stat-val">{kpis['total_publications']:,}</div>
-                <div class="executive-stat-lbl">Total Scopus Output</div>
-            </div>
-            <div class="executive-stat-card">
-                <div class="executive-stat-val">{kpis['total_citations']:,}</div>
-                <div class="executive-stat-lbl">Global Citations</div>
-            </div>
-            <div class="executive-stat-card">
-                <div class="executive-stat-val">{kpis['citations_per_pub']}</div>
-                <div class="executive-stat-lbl">Citations / Paper</div>
-            </div>
-            <div class="executive-stat-card">
-                <div class="executive-stat-val">{kpis['q1_count']} ({kpis['q1_pct']}%)</div>
-                <div class="executive-stat-lbl">Q1 Top-Tier Papers</div>
-            </div>
-            <div class="executive-stat-card">
-                <div class="executive-stat-val">{kpis['intl_collab_count']} ({kpis['intl_collab_pct']}%)</div>
-                <div class="executive-stat-lbl">International Collab</div>
-            </div>
-            <div class="executive-stat-card">
-                <div class="executive-stat-val">{kpis['active_faculty_count']:,}</div>
-                <div class="executive-stat-lbl">Active Authors</div>
-            </div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
 
 st.markdown("<br>", unsafe_allow_html=True)
 
