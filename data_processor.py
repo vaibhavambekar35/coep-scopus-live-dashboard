@@ -518,7 +518,10 @@ def get_author_profile_metrics(df: pd.DataFrame, author_name: str) -> Dict[str, 
         if isinstance(auths, str):
             auths = [a.strip() for a in auths.split(",")]
         
-        if any(author_clean == str(a).strip().lower() for a in auths):
+        matched = any(author_clean == str(a).strip().lower() or author_clean in str(a).strip().lower() for a in auths if a)
+        if not matched and "authors_str" in row and isinstance(row["authors_str"], str):
+            matched = author_clean in row["authors_str"].lower()
+        if matched:
             matching_rows.append(row.to_dict())
 
     if not matching_rows:
