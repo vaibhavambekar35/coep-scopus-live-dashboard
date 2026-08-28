@@ -1643,20 +1643,30 @@ with tab_authors:
             fig_h = style_plotly_fig(fig_h, current_theme)
             st.plotly_chart(fig_h, theme=None, use_container_width=True)
 
-        # Leaderboard Table
-        with st.expander(f"📊 View Complete Faculty Leaderboard Table ({len(top_authors_df)} Researchers)", expanded=False):
-            display_leaderboard = top_authors_df[["Rank", "Author", "Department", "Publications", "Total Citations", "CPP", "h-Index", "Q1 Papers", "Q1 Ratio", "Intl Collab %", "Industry Collab %", "Active Period"]]
-            st.dataframe(
-                display_leaderboard,
-                column_config={
-                    "Rank": st.column_config.NumberColumn("Rank", format="#%d"),
-                    "Total Citations": st.column_config.NumberColumn("Citations", format="%d ⭐"),
-                    "CPP": st.column_config.NumberColumn("CPP", format="%.2f"),
-                    "h-Index": st.column_config.NumberColumn("h-Index", format="%d 📈"),
-                },
-                use_container_width=True,
-                hide_index=True
-            )
+        # Leaderboard Table with 1-Click Interactive Row Selection
+        st.markdown("##### **📋 Click Any Faculty Researcher in Table to Inspect Complete Profile Below**")
+        display_leaderboard = top_authors_df[["Rank", "Author", "Department", "Publications", "Total Citations", "CPP", "h-Index", "Q1 Papers", "Q1 Ratio", "Intl Collab %", "Industry Collab %", "Active Period"]].copy()
+
+        tbl_selection = st.dataframe(
+            display_leaderboard,
+            column_config={
+                "Rank": st.column_config.NumberColumn("Rank", format="#%d"),
+                "Total Citations": st.column_config.NumberColumn("Citations", format="%d ⭐"),
+                "CPP": st.column_config.NumberColumn("CPP", format="%.2f"),
+                "h-Index": st.column_config.NumberColumn("h-Index", format="%d 📈"),
+            },
+            use_container_width=True,
+            hide_index=True,
+            on_select="rerun",
+            selection_mode="single-row",
+            key="leaderboard_table_selection"
+        )
+
+        if tbl_selection and tbl_selection.get("selection") and tbl_selection["selection"].get("rows"):
+            clicked_row_idx = tbl_selection["selection"]["rows"][0]
+            if clicked_row_idx < len(display_leaderboard):
+                clicked_auth = display_leaderboard.iloc[clicked_row_idx]["Author"]
+                st.session_state["active_selected_author"] = clicked_auth
 
     st.markdown("---")
 
@@ -1671,14 +1681,20 @@ with tab_authors:
     if not author_options:
         st.info("No authors available for profiling.")
     else:
+        active_author = st.session_state.get("active_selected_author", author_options[0])
+        if active_author not in author_options:
+            active_author = author_options[0]
+        curr_idx = author_options.index(active_author)
+
         col_sel_a, col_sel_b = st.columns([2, 1])
         with col_sel_a:
             selected_author_name = st.selectbox(
-                "Select Faculty Researcher:",
+                "Selected Faculty Researcher (click table row above or search here):",
                 author_options,
-                index=0,
-                key="author_profile_selector"
+                index=curr_idx,
+                key=f"author_profile_selector_box_{active_author}"
             )
+            st.session_state["active_selected_author"] = selected_author_name
 
         auth_profile = get_author_profile_metrics(df_filtered, selected_author_name)
         author_papers_df = get_author_publications(df_filtered, selected_author_name)
