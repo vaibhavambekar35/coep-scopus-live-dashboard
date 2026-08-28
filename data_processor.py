@@ -28,12 +28,6 @@ def to_dataframe(publications: List[Dict[str, Any]]) -> pd.DataFrame:
         df["sjr"] = pd.to_numeric(df["sjr"], errors="coerce").fillna(0.0)
     if "publication_date" in df.columns:
         df["pub_date_dt"] = pd.to_datetime(df["publication_date"], errors="coerce")
-        # Ensure no publication date exceeds the current date
-        today_dt = pd.Timestamp("2026-08-24")
-        future_mask = df["pub_date_dt"] > today_dt
-        if future_mask.any():
-            df.loc[future_mask, "pub_date_dt"] = today_dt
-            df.loc[future_mask, "publication_date"] = "2026-08-22"
 
     return df
 
@@ -609,7 +603,10 @@ def get_author_publications(df: pd.DataFrame, author_name: str) -> pd.DataFrame:
         if isinstance(auths, str):
             auths = [a.strip() for a in auths.split(",")]
         
-        if any(author_clean == str(a).strip().lower() for a in auths):
+        matched = any(author_clean == str(a).strip().lower() or author_clean in str(a).strip().lower() for a in auths if a)
+        if not matched and "authors_str" in row and isinstance(row["authors_str"], str):
+            matched = author_clean in row["authors_str"].lower()
+        if matched:
             matching_indices.append(idx)
 
     if not matching_indices:
@@ -644,3 +641,143 @@ def get_landmark_cited_papers(df: pd.DataFrame, top_n: int = 10) -> pd.DataFrame
     sorted_df.reset_index(drop=True, inplace=True)
     sorted_df["Rank"] = sorted_df.index + 1
     return sorted_df
+
+
+def get_department_benchmark_matrix(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Computes a comprehensive multi-metric comparative benchmark matrix for all COEP academic departments.
+    Calculates Publications Volume, Total Citations, CPP, Q1 Count, Q1 %, International %, Industry %, Active Faculty, and h-Index.
+    """
+    if df.empty or "department" not in df.columns:
+        return pd.DataFrame()
+
+    rows = []
+    for dept, sub in df.groupby("department"):
+        pubs = len(sub)
+        if pubs == 0:
+            continue
+        cites = int(sub["citations"].sum())
+        cpp = round(cites / pubs, 2) if pubs > 0 else 0.0
+
+        q1_cnt = len(sub[sub["quartile"] == "Q1"])
+        q1_pct = round((q1_cnt / pubs) * 100, 1) if pubs > 0 else 0.0
+
+        q2_cnt = len(sub[sub["quartile"] == "Q2"])
+        top_tier_pct = round(((q1_cnt + q2_cnt) / pubs) * 100, 1) if pubs > 0 else 0.0
+
+        intl_cnt = len(sub[sub["is_international_collab"] == True])
+        intl_pct = round((intl_cnt / pubs) * 100, 1) if pubs > 0 else 0.0
+
+        ind_cnt = len(sub[sub["is_industry_collab"] == True])
+        ind_pct = round((ind_cnt / pubs) * 100, 1) if pubs > 0 else 0.0
+
+        # Faculty count in this department
+        dept_faculty = set()
+        for a_list in sub["coep_authors"].dropna():
+            if isinstance(a_list, list):
+                dept_faculty.update(a_list)
+            elif isinstance(a_list, str):
+                dept_faculty.add(a_list)
+
+        # Departmental h-index
+        c_list = sorted(sub["citations"].dropna().tolist(), reverse=True)
+        h_idx = sum(1 for i, c in enumerate(c_list) if c >= i + 1)
+
+        # Top cited paper
+        top_paper = sub.sort_values(by="citations", ascending=False).iloc[0] if not sub.empty else None
+        top_title = str(top_paper.get("title", ""))[:65] + "..." if top_paper is not None else "N/A"
+        top_paper_cites = int(top_paper.get("citations", 0)) if top_paper is not None else 0
+
+        rows.append({
+            "Department": dept,
+            "Publications": pubs,
+            "Total Citations": cites,
+            "CPP": cpp,
+            "Q1 Papers": q1_cnt,
+            "Q1 %": q1_pct,
+            "Top Tier (Q1+Q2) %": top_tier_pct,
+            "Intl Collab %": intl_pct,
+            "Industry Collab %": ind_pct,
+            "Active Faculty": len(dept_faculty) if len(dept_faculty) > 0 else max(1, pubs // 8),
+            "h-Index": h_idx,
+            "Top Cited Paper": top_title,
+            "Max Paper Citations": top_paper_cites
+        })
+
+    bench_df = pd.DataFrame(rows)
+    if not bench_df.empty:
+        bench_df = bench_df.sort_values(by="Publications", ascending=False).reset_index(drop=True)
+    return bench_df
+
+
+def get_author_detailed_profile(df: pd.DataFrame, author_name: str) -> Dict[str, Any]:
+    """
+    Computes a comprehensive deep-dive research profile for a single author.
+    Includes career summary, annual publishing trajectory, top landmark papers, and co-authors.
+    """
+    if df.empty or not author_name:
+        return {}
+
+    author_pubs = get_author_publications(df, author_name)
+    if author_pubs.empty:
+        return {}
+
+    pub_count = len(author_pubs)
+    total_cites = int(author_pubs["citations"].sum()) if "citations" in author_pubs.columns else 0
+    cpp = round(total_cites / pub_count, 2) if pub_count > 0 else 0.0
+
+    c_list = sorted(author_pubs["citations"].dropna().tolist(), reverse=True)
+    h_idx = sum(1 for i, c in enumerate(c_list) if c >= i + 1)
+
+    q1_count = len(author_pubs[author_pubs["quartile"] == "Q1"])
+    q1_pct = round((q1_count / pub_count) * 100, 1) if pub_count > 0 else 0.0
+
+    intl_count = len(author_pubs[author_pubs["is_international_collab"] == True])
+    intl_pct = round((intl_count / pub_count) * 100, 1) if pub_count > 0 else 0.0
+
+    ind_count = len(author_pubs[author_pubs["is_industry_collab"] == True])
+    ind_pct = round((ind_count / pub_count) * 100, 1) if pub_count > 0 else 0.0
+
+    depts = [p for p in author_pubs["department"].dropna().tolist() if p]
+    primary_dept = max(set(depts), key=depts.count) if depts else "Engineering"
+
+    years = [int(y) for y in author_pubs["year"].dropna().tolist() if str(y).isdigit()]
+    min_yr = min(years) if years else 2020
+    max_yr = max(years) if years else 2026
+    active_span = f"{min_yr}–{max_yr}" if min_yr != max_yr else str(min_yr)
+
+    # Annual trajectory
+    trend_df = get_author_annual_trend(df, author_name)
+
+    # Top 5 landmark papers
+    top_papers = author_pubs.sort_values(by="citations", ascending=False).head(5)
+
+    # Collaborating co-authors
+    co_authors_list = []
+    for _, row in author_pubs.iterrows():
+        auths = row.get("coep_authors") or row.get("authors") or []
+        if isinstance(auths, str):
+            auths = [a.strip() for a in auths.split(",") if a.strip()]
+        for a in auths:
+            if a and a.strip().lower() != author_name.strip().lower():
+                co_authors_list.append(a.strip())
+
+    top_coauthors = pd.Series(co_authors_list).value_counts().head(8).to_dict() if co_authors_list else {}
+
+    return {
+        "author": author_name,
+        "primary_department": primary_dept,
+        "total_publications": pub_count,
+        "total_citations": total_cites,
+        "cpp": cpp,
+        "h_index": h_idx,
+        "q1_count": q1_count,
+        "q1_pct": q1_pct,
+        "intl_pct": intl_pct,
+        "industry_pct": ind_pct,
+        "active_span": active_span,
+        "trajectory_df": trend_df,
+        "top_papers_df": top_papers,
+        "top_coauthors": top_coauthors
+    }
+
