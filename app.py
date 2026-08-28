@@ -36,7 +36,9 @@ from data_processor import (
     get_author_profile_metrics,
     get_author_publications,
     get_author_annual_trend,
-    get_landmark_cited_papers
+    get_landmark_cited_papers,
+    get_department_benchmark_matrix,
+    get_author_detailed_profile
 )
 from styles import (
     get_custom_css,
@@ -795,7 +797,7 @@ st.html(render_icare_hero(kpis['total_publications'], kpis['total_citations'], t
 # ---------------------------------------------------------
 # REPORT TOOLBAR & EXPORT ACTION BUTTONS
 # ---------------------------------------------------------
-col_tool1, col_tool2, col_tool3, col_tool4 = st.columns([2, 1, 1, 1])
+col_tool1, col_tool2, col_tool3, col_tool4, col_tool5 = st.columns([2.2, 1, 1, 1.2, 1])
 
 with col_tool1:
     st.markdown('<div class="toolbar-title">📄 <strong>REPORT: COEP Live Scopus Intelligence Dashboard Overview</strong></div>', unsafe_allow_html=True)
@@ -811,6 +813,9 @@ with col_tool3:
     st.download_button("📑 Export BibTeX", data=bibtex_str, file_name=f"COEP_Scopus_{datetime.date.today()}.bib", mime="text/plain", type="primary", use_container_width=True)
 
 with col_tool4:
+    show_exec = st.checkbox("📋 Executive One-Pager", value=False, key="chk_exec_summary")
+
+with col_tool5:
     print_clicked = st.button("🖨️ Print Dashboard", key="btn_print_dashboard", type="primary", use_container_width=True)
     if print_clicked:
         components.html(
@@ -832,6 +837,50 @@ with col_tool4:
             """,
             height=0
         )
+
+if show_exec:
+    st.markdown(f"""
+    <div class="executive-briefing-box">
+        <div class="executive-header">
+            <div>
+                <div class="executive-title">🏛️ COEP Technological University — Executive Research Summary</div>
+                <div style="font-size: 0.85rem; color: {'#38BDF8' if current_theme == 'dark' else '#0284C7'}; font-weight: 700;">
+                    Official Institutional Scopus Dossier [IR-E-U-0447] • NAAC A+ (3.42) • Evaluation Period: {selected_year_range[0]}–{selected_year_range[1]}
+                </div>
+            </div>
+            <div style="font-size: 0.8rem; color: {'#94A3B8' if current_theme == 'dark' else '#64748B'}; text-align: right;">
+                <strong>Generated On:</strong> {datetime.date.today().strftime('%B %d, %Y')}<br>
+                <strong>Data Source:</strong> Elsevier Scopus Live Database
+            </div>
+        </div>
+        <div class="executive-grid">
+            <div class="executive-stat-card">
+                <div class="executive-stat-val">{kpis['total_publications']:,}</div>
+                <div class="executive-stat-lbl">Total Scopus Output</div>
+            </div>
+            <div class="executive-stat-card">
+                <div class="executive-stat-val">{kpis['total_citations']:,}</div>
+                <div class="executive-stat-lbl">Global Citations</div>
+            </div>
+            <div class="executive-stat-card">
+                <div class="executive-stat-val">{kpis['citations_per_pub']}</div>
+                <div class="executive-stat-lbl">Citations / Paper</div>
+            </div>
+            <div class="executive-stat-card">
+                <div class="executive-stat-val">{kpis['q1_count']} ({kpis['q1_pct']}%)</div>
+                <div class="executive-stat-lbl">Q1 Top-Tier Papers</div>
+            </div>
+            <div class="executive-stat-card">
+                <div class="executive-stat-val">{kpis['intl_collab_count']} ({kpis['intl_collab_pct']}%)</div>
+                <div class="executive-stat-lbl">International Collab</div>
+            </div>
+            <div class="executive-stat-card">
+                <div class="executive-stat-val">{kpis['active_faculty_count']:,}</div>
+                <div class="executive-stat-lbl">Active Authors</div>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
 st.markdown("<br>", unsafe_allow_html=True)
 
@@ -1353,6 +1402,90 @@ with tab_quality:
     top_10_df = df_filtered[df_filtered["is_top_10_percent"] == True]
     st.info(f"🌟 **Top 10% High-Impact Benchmark:** {len(top_10_df)} publications ({round(len(top_10_df)/max(1, len(df_filtered))*100, 1)}%) meet the Top 10% CiteScore & citation benchmark criteria.")
 
+    st.markdown("---")
+    st.markdown('<div class="icare-section-title">📊 COEP Department Comparative Benchmark Matrix</div>', unsafe_allow_html=True)
+    st.caption("Multi-dimensional comparative assessment of COEP academic departments across Research Volume, Citations per Paper (CPP), Q1 Ratio, and Collaboration Rates (NIRF & NAAC Criteria 3).")
+
+    bench_matrix_df = get_department_benchmark_matrix(df_filtered)
+    if not bench_matrix_df.empty:
+        col_bm1, col_bm2 = st.columns([1, 1])
+        with col_bm1:
+            st.markdown("###### **5-Dimension Department Benchmark Radar (Spider Chart)**")
+            radar_depts = bench_matrix_df["Department"].tolist()
+            sel_radar_depts = st.multiselect(
+                "Select Departments to Compare:",
+                radar_depts,
+                default=radar_depts[:4] if len(radar_depts) >= 4 else radar_depts,
+                key="sel_benchmark_radar_depts"
+            )
+            if sel_radar_depts:
+                radar_categories = ["Volume", "CPP", "Q1 %", "Intl Collab %", "Industry Collab %"]
+                max_v = bench_matrix_df["Publications"].max() or 1
+                max_cpp = bench_matrix_df["CPP"].max() or 1
+
+                fig_radar = go.Figure()
+                for d_name in sel_radar_depts:
+                    row_match = bench_matrix_df[bench_matrix_df["Department"] == d_name]
+                    if not row_match.empty:
+                        r_data = row_match.iloc[0]
+                        v_norm = round((r_data["Publications"] / max_v) * 100, 1)
+                        cpp_norm = round((r_data["CPP"] / max_cpp) * 100, 1)
+                        vals = [v_norm, cpp_norm, r_data["Q1 %"], r_data["Intl Collab %"], r_data["Industry Collab %"]]
+                        vals.append(vals[0])
+                        fig_radar.add_trace(go.Scatterpolar(
+                            r=vals,
+                            theta=radar_categories + [radar_categories[0]],
+                            fill="toself",
+                            name=d_name
+                        ))
+                fig_radar.update_layout(
+                    polar=dict(radialaxis=dict(visible=True, range=[0, 100])),
+                    height=360,
+                    margin=dict(l=25, r=25, t=25, b=25),
+                    legend=dict(orientation="h", yanchor="bottom", y=-0.25, xanchor="center", x=0.5)
+                )
+                fig_radar = style_plotly_fig(fig_radar, current_theme)
+                st.plotly_chart(fig_radar, theme=None, use_container_width=True)
+
+        with col_bm2:
+            st.markdown("###### **Impact vs. Volume Quadrant Bubble Chart**")
+            fig_bubble = px.scatter(
+                bench_matrix_df,
+                x="Publications",
+                y="CPP",
+                size="Q1 %",
+                color="Department",
+                hover_name="Department",
+                hover_data=["Total Citations", "Q1 Papers", "Active Faculty", "h-Index"],
+                text="Department",
+                labels={"Publications": "Total Publications (Volume)", "CPP": "Citations per Publication (CPP)"}
+            )
+            fig_bubble.update_traces(textposition="top center")
+            fig_bubble.update_layout(
+                height=360,
+                margin=dict(l=20, r=20, t=20, b=20),
+                showlegend=False
+            )
+            fig_bubble = style_plotly_fig(fig_bubble, current_theme)
+            st.plotly_chart(fig_bubble, theme=None, use_container_width=True)
+
+        st.markdown("##### **Department Performance Benchmark League Table**")
+        st.dataframe(
+            bench_matrix_df,
+            column_config={
+                "Publications": st.column_config.NumberColumn("Publications", format="%d 📚"),
+                "Total Citations": st.column_config.NumberColumn("Total Citations", format="%d ⭐"),
+                "CPP": st.column_config.NumberColumn("CPP", format="%.2f"),
+                "Q1 %": st.column_config.NumberColumn("Q1 %", format="%.1f%%"),
+                "Top Tier (Q1+Q2) %": st.column_config.NumberColumn("Top Tier %", format="%.1f%%"),
+                "Intl Collab %": st.column_config.NumberColumn("Intl %", format="%.1f%%"),
+                "Industry Collab %": st.column_config.NumberColumn("Industry %", format="%.1f%%"),
+                "h-Index": st.column_config.NumberColumn("h-Index", format="%d 📈"),
+            },
+            use_container_width=True,
+            hide_index=True
+        )
+
 # ---------------------------------------------------------
 # TAB 5: AUTHOR INTELLIGENCE & FACULTY DOSSIER
 # ---------------------------------------------------------
@@ -1643,6 +1776,36 @@ with tab_authors:
                     st.plotly_chart(fig_auth_q, theme=None, use_container_width=True)
                 else:
                     st.info("No quartile distribution data available.")
+
+            # Top 5 Landmark Papers for this Author
+            author_top5 = author_papers_df.sort_values(by="citations", ascending=False).head(5)
+            if not author_top5.empty:
+                st.markdown(f"##### **🌟 Top Landmark Contributions by {selected_author_name}**")
+                for _, p_row in author_top5.iterrows():
+                    p_title = p_row.get("title", "Untitled")
+                    p_journal = p_row.get("journal", "Unknown Publication")
+                    p_year = p_row.get("year", 2025)
+                    p_cites = int(p_row.get("citations", 0))
+                    p_quartile = p_row.get("quartile", "Q1")
+                    p_doi_url = p_row.get("doi_url", "#")
+
+                    q_color = "#10B981" if p_quartile == "Q1" else ("#3B82F6" if p_quartile == "Q2" else "#F59E0B")
+                    st.markdown(f"""
+                    <div style="background: {'rgba(15, 23, 42, 0.5)' if current_theme == 'dark' else '#F8FAFC'}; border: 1px solid {'#1E3250' if current_theme == 'dark' else '#E2E8F0'}; border-radius: 10px; padding: 12px 16px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                        <div style="flex: 1; min-width: 260px;">
+                            <div style="font-weight: 700; font-size: 0.92rem; color: {'#FFFFFF' if current_theme == 'dark' else '#0F172A'};">
+                                <a href="{p_doi_url}" target="_blank" style="color: inherit; text-decoration: none;">{p_title} ↗</a>
+                            </div>
+                            <div style="font-size: 0.78rem; color: {'#94A3B8' if current_theme == 'dark' else '#64748B'}; margin-top: 3px;">
+                                📖 <em>{p_journal}</em> • {p_year}
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <span style="background: {q_color}22; color: {q_color}; border: 1px solid {q_color}; font-size: 0.72rem; font-weight: 800; padding: 2px 8px; border-radius: 6px;">{p_quartile}</span>
+                            <span style="background: rgba(245, 158, 11, 0.15); color: #F59E0B; border: 1px solid #F59E0B; font-size: 0.75rem; font-weight: 800; padding: 2px 10px; border-radius: 6px;">⭐ {p_cites} Citations</span>
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
 
             # 3. Author's Published Papers Directory
             st.markdown(f"#### **📄 Publications Authored by {selected_author_name} ({len(author_papers_df)} Papers)**")
