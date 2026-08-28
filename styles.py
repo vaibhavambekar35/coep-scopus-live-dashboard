@@ -1499,10 +1499,10 @@ def get_custom_css(theme: str = "dark") -> str:
                     margin: 0 !important;
                     max-width: 100% !important;
                 }}
-                .icare-topbar, .icare-hero, .icare-kpi-card, .icare-section-title, .stPlotlyChart, .icare-feed-card, .executive-briefing-box {
+                .icare-topbar, .icare-hero, .icare-kpi-card, .icare-section-title, .stPlotlyChart, .icare-feed-card, .executive-briefing-box {{
                     break-inside: avoid !important;
                     page-break-inside: avoid !important;
-                }
+                }}
 
                 /* Targeted Author Profile Print Isolation */
                 body.print-author-only-mode .icare-topbar,
@@ -1515,15 +1515,15 @@ def get_custom_css(theme: str = "dark") -> str:
                 body.print-author-only-mode [data-testid="stSelectbox"],
                 body.print-author-only-mode [data-testid="stButton"],
                 body.print-author-only-mode [data-testid="stDownloadButton"],
-                body.print-author-only-mode [data-testid="stRadio"] {
+                body.print-author-only-mode [data-testid="stRadio"] {{
                     display: none !important;
-                }
-                body.print-author-only-mode .author-print-banner {
+                }}
+                body.print-author-only-mode .author-print-banner {{
                     display: block !important;
                     margin-bottom: 20px !important;
-                }
-            }
-        }
+                }}
+            }}
+        }}
     </style>
     """
 
