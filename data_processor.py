@@ -504,6 +504,25 @@ def get_top_authors_leaderboard(df: pd.DataFrame, top_n: int = 25, sort_by: str 
     return result_df.head(top_n)
 
 
+def get_all_unique_authors(df: pd.DataFrame) -> List[str]:
+    """Returns a complete list of all unique publishing faculty/authors in the dataset, sorted by publication count then name."""
+    if df.empty:
+        return []
+
+    author_counts: Dict[str, int] = {}
+    for _, row in df.iterrows():
+        auths = row.get("coep_authors") or row.get("authors") or []
+        if isinstance(auths, str):
+            auths = [a.strip() for a in auths.split(",")]
+        for a in auths:
+            if a and len(str(a).strip()) > 1:
+                clean_a = str(a).strip()
+                author_counts[clean_a] = author_counts.get(clean_a, 0) + 1
+
+    sorted_authors = sorted(author_counts.keys(), key=lambda k: (-author_counts[k], k))
+    return sorted_authors
+
+
 def get_author_profile_metrics(df: pd.DataFrame, author_name: str) -> Dict[str, Any]:
     """Computes comprehensive career profile metrics for a specific author."""
     if df.empty or not author_name:
