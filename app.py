@@ -39,7 +39,8 @@ from data_processor import (
     get_landmark_cited_papers,
     get_department_benchmark_matrix,
     get_author_detailed_profile,
-    get_all_unique_authors
+    get_all_unique_authors,
+    generate_author_print_html
 )
 from styles import (
     get_custom_css,
@@ -1707,30 +1708,62 @@ with tab_authors:
             )
         with col_sel_b:
             st.markdown("<div style='height: 28px;'></div>", unsafe_allow_html=True)
-            st.button("🖨️ Print Profile", key="btn_print_author_profile", use_container_width=True)
+            print_author_btn = st.button("🖨️ Print Profile", key="btn_print_author_profile", use_container_width=True)
 
         auth_profile = get_author_profile_metrics(df_filtered, selected_author_name)
         author_papers_df = get_author_publications(df_filtered, selected_author_name)
+        annual_trend_df = get_author_annual_trend(df_filtered, selected_author_name)
+
+        if print_author_btn and auth_profile:
+            author_report_html = generate_author_print_html(auth_profile, author_papers_df, annual_trend_df)
+            b64_rep = base64.b64encode(author_report_html.encode("utf-8")).decode("utf-8")
+            components.html(
+                f"""
+                <script>
+                    (function() {{
+                        const b64 = "{b64_rep}";
+                        const html = decodeURIComponent(escape(window.atob(b64)));
+                        const pWin = window.open('', '_blank');
+                        if (pWin) {{
+                            pWin.document.open();
+                            pWin.document.write(html);
+                            pWin.document.close();
+                            pWin.focus();
+                            setTimeout(() => {{
+                                pWin.print();
+                            }}, 400);
+                        }} else {{
+                            let frame = window.parent.document.getElementById('author-print-isolated-frame');
+                            if (!frame) {{
+                                frame = window.parent.document.createElement('iframe');
+                                frame.id = 'author-print-isolated-frame';
+                                frame.style.position = 'fixed';
+                                frame.style.right = '0';
+                                frame.style.bottom = '0';
+                                frame.style.width = '0';
+                                frame.style.height = '0';
+                                frame.style.border = '0';
+                                window.parent.document.body.appendChild(frame);
+                            }}
+                            const doc = frame.contentWindow.document;
+                            doc.open();
+                            doc.write(html);
+                            doc.close();
+                            frame.contentWindow.focus();
+                            setTimeout(() => {{
+                                frame.contentWindow.print();
+                            }}, 400);
+                        }}
+                    }})();
+                </script>
+                """,
+                height=0
+            )
 
         if auth_profile:
             # Initials
             name_parts = selected_author_name.split()
             initials = "".join([p[0].upper() for p in name_parts[:2]]) if name_parts else "AU"
-
-            # Official Print Header (displayed only when printing author profile)
-            st.markdown(f"""
-            <div class="author-print-banner" style="display: none;">
-                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #0284C7; padding-bottom: 8px; margin-bottom: 16px;">
-                    <div>
-                        <h2 style="margin: 0; color: {'#0F172A' if current_theme == 'light' else '#FFFFFF'}; font-size: 1.35rem; font-weight: 800;">COEP Technological University, Pune</h2>
-                        <p style="margin: 2px 0 0 0; color: #0284C7; font-size: 0.85rem; font-weight: 700;">Faculty Research Dossier & Scopus Impact Profile</p>
-                    </div>
-                    <div style="text-align: right;">
-                        <span style="font-size: 0.78rem; font-weight: 800; color: #F59E0B; text-transform: uppercase;">IR-E-U-0447 • NIRF Engineering</span>
-                    </div>
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
 
             # Profile Header Card
             st.markdown(f"""
