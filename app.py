@@ -128,15 +128,39 @@ components.html(
                 if (d) {
                     d.addEventListener('click', function(e) {
                         const btn = e.target.closest('button');
-                        if (btn && (btn.innerText.includes('Print Dashboard') || btn.innerText.includes('Print Page'))) {
-                            setTimeout(() => {
-                                try {
-                                    if (p && p.print) p.print();
-                                    else window.print();
-                                } catch(err) {
-                                    window.print();
-                                }
-                            }, 120);
+                        if (btn) {
+                            const btnText = btn.innerText || '';
+                            if (btnText.includes('Print Author') || btnText.includes('Print Profile')) {
+                                const targetBody = (p.document || document).body;
+                                targetBody.classList.add('print-author-only-mode');
+                                const cleanup = function() {
+                                    targetBody.classList.remove('print-author-only-mode');
+                                    p.removeEventListener('afterprint', cleanup);
+                                    window.removeEventListener('afterprint', cleanup);
+                                };
+                                p.addEventListener('afterprint', cleanup);
+                                window.addEventListener('afterprint', cleanup);
+                                setTimeout(() => {
+                                    try {
+                                        if (p && p.print) p.print();
+                                        else window.print();
+                                    } catch(err) {
+                                        window.print();
+                                    }
+                                    setTimeout(cleanup, 2000);
+                                }, 150);
+                            } else if (btnText.includes('Print Dashboard') || btnText.includes('Print Page')) {
+                                const targetBody = (p.document || document).body;
+                                targetBody.classList.remove('print-author-only-mode');
+                                setTimeout(() => {
+                                    try {
+                                        if (p && p.print) p.print();
+                                        else window.print();
+                                    } catch(err) {
+                                        window.print();
+                                    }
+                                }, 120);
+                            }
                         }
                     }, true);
                 }
@@ -1511,6 +1535,7 @@ with tab_quality:
 # TAB 5: AUTHOR INTELLIGENCE & FACULTY DOSSIER
 # ---------------------------------------------------------
 with tab_authors:
+    st.markdown('<div class="tab5-top-leaderboard">', unsafe_allow_html=True)
     st.markdown('<div class="icare-section-title">👥 Faculty Author Intelligence & Research Dossier</div>', unsafe_allow_html=True)
     st.caption("Institutional leaderboards, individual researcher dossiers, publishing velocity timelines, and author-specific publication directories.")
 
@@ -1658,6 +1683,7 @@ with tab_authors:
                 use_container_width=True,
                 hide_index=True
             )
+        st.markdown('</div>', unsafe_allow_html=True)
 
     st.markdown("---")
 
@@ -1671,7 +1697,7 @@ with tab_authors:
     if not all_author_options:
         st.info("No authors available for profiling.")
     else:
-        col_sel_a, col_sel_b = st.columns([2, 1])
+        col_sel_a, col_sel_b = st.columns([3.2, 1.2])
         with col_sel_a:
             selected_author_name = st.selectbox(
                 "Selected Faculty Researcher:",
@@ -1679,6 +1705,9 @@ with tab_authors:
                 index=0,
                 key="author_profile_selector_dropdown"
             )
+        with col_sel_b:
+            st.markdown("<div style='height: 28px;'></div>", unsafe_allow_html=True)
+            st.button("🖨️ Print Profile", key="btn_print_author_profile", use_container_width=True)
 
         auth_profile = get_author_profile_metrics(df_filtered, selected_author_name)
         author_papers_df = get_author_publications(df_filtered, selected_author_name)
@@ -1687,6 +1716,21 @@ with tab_authors:
             # Initials
             name_parts = selected_author_name.split()
             initials = "".join([p[0].upper() for p in name_parts[:2]]) if name_parts else "AU"
+
+            # Official Print Header (displayed only when printing author profile)
+            st.markdown(f"""
+            <div class="author-print-banner" style="display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #0284C7; padding-bottom: 8px; margin-bottom: 16px;">
+                    <div>
+                        <h2 style="margin: 0; color: {'#0F172A' if current_theme == 'light' else '#FFFFFF'}; font-size: 1.35rem; font-weight: 800;">COEP Technological University, Pune</h2>
+                        <p style="margin: 2px 0 0 0; color: #0284C7; font-size: 0.85rem; font-weight: 700;">Faculty Research Dossier & Scopus Impact Profile</p>
+                    </div>
+                    <div style="text-align: right;">
+                        <span style="font-size: 0.78rem; font-weight: 800; color: #F59E0B; text-transform: uppercase;">IR-E-U-0447 • NIRF Engineering</span>
+                    </div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
 
             # Profile Header Card
             st.markdown(f"""
