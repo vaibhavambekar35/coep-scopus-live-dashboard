@@ -31,7 +31,7 @@ def call_gemini_api(prompt: str, context: str, api_key: str) -> Optional[str]:
         url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
         
         system_instruction = (
-            "You are the COEP Research Intelligence AI Copilot for COEP Technological University, Pune (A Unitary Public Technological University to Government Maharashtra, Estd. 2022). "
+            "You are the COEP Research Intelligence AI Copilot for COEP Technological University, Pune (A Unitary Public Technological University of the Government of Maharashtra, Estd. 2022). "
             "You have access to verified Scopus bibliometric data for COEP faculty and departments. "
             "Provide concise, authoritative, executive-level insights, rankings, data tables, and specific paper counts. "
             "Always base your answers strictly on the provided Scopus data context. If specific author or paper data is asked, find and report it accurately. "
