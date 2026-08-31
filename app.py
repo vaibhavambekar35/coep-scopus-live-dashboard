@@ -512,7 +512,7 @@ if "publications_data" not in st.session_state:
 with st.sidebar:
     st.markdown("""
     <div class="sidebar-brand-box">
-        <div class="sidebar-brand-title">🏛️ COEP PORTAL</div>
+        <div class="sidebar-brand-title">🏛️ COEP TECH PORTAL</div>
         <div class="sidebar-brand-sub">Live Scopus Intelligence [IR-E-U-1257]</div>
     </div>
     """, unsafe_allow_html=True)
