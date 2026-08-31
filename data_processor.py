@@ -27,6 +27,10 @@ def to_dataframe(publications: List[Dict[str, Any]]) -> pd.DataFrame:
     if "sjr" in df.columns:
         df["sjr"] = pd.to_numeric(df["sjr"], errors="coerce").fillna(0.0)
     if "publication_date" in df.columns:
+        today_str = datetime.now().strftime("%Y-%m-%d")
+        df["publication_date"] = df["publication_date"].astype(str).apply(
+            lambda d: today_str if d > today_str and d not in ["None", "nan", ""] else d
+        )
         df["pub_date_dt"] = pd.to_datetime(df["publication_date"], errors="coerce")
 
     return df
