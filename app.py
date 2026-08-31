@@ -513,7 +513,7 @@ with st.sidebar:
     st.markdown("""
     <div class="sidebar-brand-box">
         <div class="sidebar-brand-title">🏛️ COEP PORTAL</div>
-        <div class="sidebar-brand-sub">Live Scopus Intelligence [IR-E-U-0447]</div>
+        <div class="sidebar-brand-sub">Live Scopus Intelligence [IR-E-U-1257]</div>
     </div>
     """, unsafe_allow_html=True)
 
