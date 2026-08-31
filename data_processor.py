@@ -939,7 +939,7 @@ def generate_author_print_html(auth_profile: Dict[str, Any], author_papers_df: p
             <div class="inst-sub">Faculty Research Dossier & Scopus Bibliometric Impact Record</div>
         </div>
         <div class="badge-nirf">
-            NAAC A+ (CGPA 3.42)<br>NIRF Category: Engineering<br><span style="color:#0284C7;">IR-E-U-0447</span>
+            NAAC A+ (CGPA 3.42)<br>NIRF Category: Engineering<br><span style="color:#0284C7;">IR-E-U-1257</span>
         </div>
     </div>
 
