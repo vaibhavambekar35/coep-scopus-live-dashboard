@@ -1550,7 +1550,7 @@ def render_icare_topbar(theme: str = "dark") -> str:
         <div style="display: flex; align-items: center; gap: 14px;">
             <div style="display: flex; flex-direction: column; text-align: right;">
                 <span style="font-weight: 800; font-size: 1rem; color: {'#FFFFFF' if is_dark else '#0F172A'}; letter-spacing: -0.01em;">COEP Technological University</span>
-                <span style="font-size: 0.78rem; color: #0284C7; font-weight: 700;">IR-E-U-0447 • Pune, Maharashtra</span>
+                <span style="font-size: 0.78rem; color: #0284C7; font-weight: 700;">IR-E-U-1257 • Pune, Maharashtra</span>
             </div>
             {coep_img_html}
         </div>
