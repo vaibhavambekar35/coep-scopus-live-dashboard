@@ -5,7 +5,7 @@ Computes all 10 Top KPIs, Trend Analytics, Research Impact, Collaboration Stats,
 Quality Metrics (Q1-Q4), and Data Filtering.
 """
 
-import datetime
+from datetime import datetime, date
 import pandas as pd
 from typing import Dict, Any, List, Optional
 
