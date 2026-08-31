@@ -1568,7 +1568,7 @@ def render_icare_hero(total_pubs: int, total_cites: int, theme: str = "dark") ->
                 <div class="hero-badge-group">
                     <span class="hero-pill hero-pill-gold">🏆 Scopus Research Dossier</span>
                     <span class="hero-pill">🏛️ State Technological University (Estd. 1854)</span>
-                    <span class="hero-pill hero-pill-cyan">⭐ NAAC A+ (CGPA 3.42)</span>
+                    <span class="hero-pill hero-pill-cyan">⭐ NAAC A+ (CGPA 3.44)</span>
                     <span class="hero-pill" style="border-color: #0284C7; color: {'#38BDF8' if is_dark else '#0284C7'};">📜 NIRF Category: Engineering</span>
                 </div>
                 <div class="hero-title">COEP Live Scopus Intelligence Dashboard</div>
