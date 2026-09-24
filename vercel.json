@@ -1,0 +1,9 @@
+{
+  "version": 2,
+  "name": "coep-scopus-live-dashboard",
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/web_dashboard/api/$1" },
+    { "source": "/(.*)", "destination": "/web_dashboard/$1" }
+  ]
+}

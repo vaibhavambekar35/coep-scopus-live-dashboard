@@ -5,7 +5,7 @@ Computes all 10 Top KPIs, Trend Analytics, Research Impact, Collaboration Stats,
 Quality Metrics (Q1-Q4), and Data Filtering.
 """
 
-import datetime
+from datetime import datetime, date
 import pandas as pd
 from typing import Dict, Any, List, Optional
 
@@ -27,13 +27,11 @@ def to_dataframe(publications: List[Dict[str, Any]]) -> pd.DataFrame:
     if "sjr" in df.columns:
         df["sjr"] = pd.to_numeric(df["sjr"], errors="coerce").fillna(0.0)
     if "publication_date" in df.columns:
+        today_str = datetime.now().strftime("%Y-%m-%d")
+        df["publication_date"] = df["publication_date"].astype(str).apply(
+            lambda d: today_str if d > today_str and d not in ["None", "nan", ""] else d
+        )
         df["pub_date_dt"] = pd.to_datetime(df["publication_date"], errors="coerce")
-        # Ensure no publication date exceeds the current date
-        today_dt = pd.Timestamp("2026-08-24")
-        future_mask = df["pub_date_dt"] > today_dt
-        if future_mask.any():
-            df.loc[future_mask, "pub_date_dt"] = today_dt
-            df.loc[future_mask, "publication_date"] = "2026-08-22"
 
     return df
 
@@ -510,6 +508,25 @@ def get_top_authors_leaderboard(df: pd.DataFrame, top_n: int = 25, sort_by: str 
     return result_df.head(top_n)
 
 
+def get_all_unique_authors(df: pd.DataFrame) -> List[str]:
+    """Returns a complete list of all unique publishing faculty/authors in the dataset, sorted by publication count then name."""
+    if df.empty:
+        return []
+
+    author_counts: Dict[str, int] = {}
+    for _, row in df.iterrows():
+        auths = row.get("coep_authors") or row.get("authors") or []
+        if isinstance(auths, str):
+            auths = [a.strip() for a in auths.split(",")]
+        for a in auths:
+            if a and len(str(a).strip()) > 1:
+                clean_a = str(a).strip()
+                author_counts[clean_a] = author_counts.get(clean_a, 0) + 1
+
+    sorted_authors = sorted(author_counts.keys(), key=lambda k: (-author_counts[k], k))
+    return sorted_authors
+
+
 def get_author_profile_metrics(df: pd.DataFrame, author_name: str) -> Dict[str, Any]:
     """Computes comprehensive career profile metrics for a specific author."""
     if df.empty or not author_name:
@@ -524,7 +541,10 @@ def get_author_profile_metrics(df: pd.DataFrame, author_name: str) -> Dict[str, 
         if isinstance(auths, str):
             auths = [a.strip() for a in auths.split(",")]
         
-        if any(author_clean == str(a).strip().lower() for a in auths):
+        matched = any(author_clean == str(a).strip().lower() or author_clean in str(a).strip().lower() for a in auths if a)
+        if not matched and "authors_str" in row and isinstance(row["authors_str"], str):
+            matched = author_clean in row["authors_str"].lower()
+        if matched:
             matching_rows.append(row.to_dict())
 
     if not matching_rows:
@@ -609,7 +629,10 @@ def get_author_publications(df: pd.DataFrame, author_name: str) -> pd.DataFrame:
         if isinstance(auths, str):
             auths = [a.strip() for a in auths.split(",")]
         
-        if any(author_clean == str(a).strip().lower() for a in auths):
+        matched = any(author_clean == str(a).strip().lower() or author_clean in str(a).strip().lower() for a in auths if a)
+        if not matched and "authors_str" in row and isinstance(row["authors_str"], str):
+            matched = author_clean in row["authors_str"].lower()
+        if matched:
             matching_indices.append(idx)
 
     if not matching_indices:
@@ -644,3 +667,345 @@ def get_landmark_cited_papers(df: pd.DataFrame, top_n: int = 10) -> pd.DataFrame
     sorted_df.reset_index(drop=True, inplace=True)
     sorted_df["Rank"] = sorted_df.index + 1
     return sorted_df
+
+
+def get_department_benchmark_matrix(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Computes a comprehensive multi-metric comparative benchmark matrix for all COEP academic departments.
+    Calculates Publications Volume, Total Citations, CPP, Q1 Count, Q1 %, International %, Industry %, Active Faculty, and h-Index.
+    """
+    if df.empty or "department" not in df.columns:
+        return pd.DataFrame()
+
+    rows = []
+    for dept, sub in df.groupby("department"):
+        pubs = len(sub)
+        if pubs == 0:
+            continue
+        cites = int(sub["citations"].sum())
+        cpp = round(cites / pubs, 2) if pubs > 0 else 0.0
+
+        q1_cnt = len(sub[sub["quartile"] == "Q1"])
+        q1_pct = round((q1_cnt / pubs) * 100, 1) if pubs > 0 else 0.0
+
+        q2_cnt = len(sub[sub["quartile"] == "Q2"])
+        top_tier_pct = round(((q1_cnt + q2_cnt) / pubs) * 100, 1) if pubs > 0 else 0.0
+
+        intl_cnt = len(sub[sub["is_international_collab"] == True])
+        intl_pct = round((intl_cnt / pubs) * 100, 1) if pubs > 0 else 0.0
+
+        ind_cnt = len(sub[sub["is_industry_collab"] == True])
+        ind_pct = round((ind_cnt / pubs) * 100, 1) if pubs > 0 else 0.0
+
+        # Faculty count in this department
+        dept_faculty = set()
+        for a_list in sub["coep_authors"].dropna():
+            if isinstance(a_list, list):
+                dept_faculty.update(a_list)
+            elif isinstance(a_list, str):
+                dept_faculty.add(a_list)
+
+        # Departmental h-index
+        c_list = sorted(sub["citations"].dropna().tolist(), reverse=True)
+        h_idx = sum(1 for i, c in enumerate(c_list) if c >= i + 1)
+
+        # Top cited paper
+        top_paper = sub.sort_values(by="citations", ascending=False).iloc[0] if not sub.empty else None
+        top_title = str(top_paper.get("title", ""))[:65] + "..." if top_paper is not None else "N/A"
+        top_paper_cites = int(top_paper.get("citations", 0)) if top_paper is not None else 0
+
+        rows.append({
+            "Department": dept,
+            "Publications": pubs,
+            "Total Citations": cites,
+            "CPP": cpp,
+            "Q1 Papers": q1_cnt,
+            "Q1 %": q1_pct,
+            "Top Tier (Q1+Q2) %": top_tier_pct,
+            "Intl Collab %": intl_pct,
+            "Industry Collab %": ind_pct,
+            "Active Faculty": len(dept_faculty) if len(dept_faculty) > 0 else max(1, pubs // 8),
+            "h-Index": h_idx,
+            "Top Cited Paper": top_title,
+            "Max Paper Citations": top_paper_cites
+        })
+
+    bench_df = pd.DataFrame(rows)
+    if not bench_df.empty:
+        bench_df = bench_df.sort_values(by="Publications", ascending=False).reset_index(drop=True)
+    return bench_df
+
+
+def get_author_detailed_profile(df: pd.DataFrame, author_name: str) -> Dict[str, Any]:
+    """
+    Computes a comprehensive deep-dive research profile for a single author.
+    Includes career summary, annual publishing trajectory, top landmark papers, and co-authors.
+    """
+    if df.empty or not author_name:
+        return {}
+
+    author_pubs = get_author_publications(df, author_name)
+    if author_pubs.empty:
+        return {}
+
+    pub_count = len(author_pubs)
+    total_cites = int(author_pubs["citations"].sum()) if "citations" in author_pubs.columns else 0
+    cpp = round(total_cites / pub_count, 2) if pub_count > 0 else 0.0
+
+    c_list = sorted(author_pubs["citations"].dropna().tolist(), reverse=True)
+    h_idx = sum(1 for i, c in enumerate(c_list) if c >= i + 1)
+
+    q1_count = len(author_pubs[author_pubs["quartile"] == "Q1"])
+    q1_pct = round((q1_count / pub_count) * 100, 1) if pub_count > 0 else 0.0
+
+    intl_count = len(author_pubs[author_pubs["is_international_collab"] == True])
+    intl_pct = round((intl_count / pub_count) * 100, 1) if pub_count > 0 else 0.0
+
+    ind_count = len(author_pubs[author_pubs["is_industry_collab"] == True])
+    ind_pct = round((ind_count / pub_count) * 100, 1) if pub_count > 0 else 0.0
+
+    depts = [p for p in author_pubs["department"].dropna().tolist() if p]
+    primary_dept = max(set(depts), key=depts.count) if depts else "Engineering"
+
+    years = [int(y) for y in author_pubs["year"].dropna().tolist() if str(y).isdigit()]
+    min_yr = min(years) if years else 2020
+    max_yr = max(years) if years else 2026
+    active_span = f"{min_yr}–{max_yr}" if min_yr != max_yr else str(min_yr)
+
+    # Annual trajectory
+    trend_df = get_author_annual_trend(df, author_name)
+
+    # Top 5 landmark papers
+    top_papers = author_pubs.sort_values(by="citations", ascending=False).head(5)
+
+    # Collaborating co-authors
+    co_authors_list = []
+    for _, row in author_pubs.iterrows():
+        auths = row.get("coep_authors") or row.get("authors") or []
+        if isinstance(auths, str):
+            auths = [a.strip() for a in auths.split(",") if a.strip()]
+        for a in auths:
+            if a and a.strip().lower() != author_name.strip().lower():
+                co_authors_list.append(a.strip())
+
+    top_coauthors = pd.Series(co_authors_list).value_counts().head(8).to_dict() if co_authors_list else {}
+
+    return {
+        "author": author_name,
+        "primary_department": primary_dept,
+        "total_publications": pub_count,
+        "total_citations": total_cites,
+        "cpp": cpp,
+        "h_index": h_idx,
+        "q1_count": q1_count,
+        "q1_pct": q1_pct,
+        "intl_pct": intl_pct,
+        "industry_pct": ind_pct,
+        "active_span": active_span,
+        "trajectory_df": trend_df,
+        "top_papers_df": top_papers,
+        "top_coauthors": top_coauthors
+    }
+
+
+def generate_author_print_html(auth_profile: Dict[str, Any], author_papers_df: pd.DataFrame, annual_trend_df: pd.DataFrame) -> str:
+    """Generates a standalone, self-contained printable HTML report for a specific author."""
+    author_name = auth_profile.get("author_name", "Faculty Researcher")
+    dept = auth_profile.get("primary_dept", "COEP Technological University")
+    total_pubs = auth_profile.get("total_pubs", 0)
+    total_cites = auth_profile.get("total_citations", 0)
+    cpp = auth_profile.get("cpp", 0.0)
+    h_idx = auth_profile.get("h_index", 0)
+    q1_pct = auth_profile.get("q1_pct", 0.0)
+    q1_count = auth_profile.get("q1_count", 0)
+    intl_pct = auth_profile.get("intl_pct", 0.0)
+    ind_pct = auth_profile.get("ind_pct", 0.0)
+    min_year = auth_profile.get("min_year", 2020)
+    max_year = auth_profile.get("max_year", 2026)
+    top_collabs = ", ".join(auth_profile.get("top_collaborators", [])[:4]) or "COEP Faculty"
+
+    # Velocity Chart SVG
+    trend_bars_svg = ""
+    if not annual_trend_df.empty:
+        max_p = max(annual_trend_df["publications"].max(), 1)
+        max_c = max(annual_trend_df["citations"].max(), 1)
+        w_chart = 380
+        h_chart = 150
+        n_pts = len(annual_trend_df)
+        bar_w = max(int(w_chart / (n_pts * 2.2)), 8)
+        
+        svg_bars = []
+        svg_line_pts = []
+        for i, (_, tr_row) in enumerate(annual_trend_df.iterrows()):
+            yr = tr_row["year"]
+            p_val = tr_row["publications"]
+            c_val = tr_row["citations"]
+            
+            x = int(35 + (i * (w_chart - 50) / max(n_pts - 1, 1)))
+            bar_h = int((p_val / max_p) * 100)
+            y_bar = 125 - bar_h
+            
+            svg_bars.append(f'<rect x="{x - bar_w//2}" y="{y_bar}" width="{bar_w}" height="{bar_h}" fill="#0284C7" rx="2"><title>{yr}: {p_val} papers</title></rect>')
+            svg_bars.append(f'<text x="{x}" y="140" font-size="8.5" text-anchor="middle" fill="#64748B">{yr}</text>')
+            
+            y_line = int(125 - ((c_val / max_c) * 100))
+            svg_line_pts.append(f'{x},{y_line}')
+            svg_bars.append(f'<circle cx="{x}" cy="{y_line}" r="3" fill="#F59E0B"><title>{yr}: {c_val} citations</title></circle>')
+            
+        trend_bars_svg = f'''
+        <svg width="100%" height="155" viewBox="0 0 {w_chart} {h_chart + 10}">
+            <line x1="15" y1="125" x2="{w_chart - 10}" y2="125" stroke="#CBD5E1" stroke-width="1"/>
+            <polyline fill="none" stroke="#F59E0B" stroke-width="2" points="{" ".join(svg_line_pts)}"/>
+            {"".join(svg_bars)}
+        </svg>
+        '''
+
+    # Quartiles
+    q1 = auth_profile.get("q1_count", 0)
+    q2 = auth_profile.get("q2_count", 0)
+    q3 = auth_profile.get("q3_count", 0)
+    q4 = auth_profile.get("q4_count", 0)
+    
+    # Top 5 landmark papers
+    top5_df = author_papers_df.sort_values(by="citations", ascending=False).head(5)
+    top5_rows = ""
+    for idx, (_, row) in enumerate(top5_df.iterrows(), 1):
+        p_tit = row.get("title", "Untitled")
+        p_jnl = row.get("journal", "Publication")
+        p_yr = row.get("year", "")
+        p_q = row.get("quartile", "Q1")
+        p_cit = int(row.get("citations", 0))
+        q_bg = "#ECFDF5" if p_q == "Q1" else ("#EFF6FF" if p_q == "Q2" else "#FEF3C7")
+        q_fg = "#059669" if p_q == "Q1" else ("#2563EB" if p_q == "Q2" else "#D97706")
+        
+        top5_rows += f"""
+        <tr>
+            <td style="text-align:center; font-weight:800; color:#0284C7;">#{idx}</td>
+            <td><strong style="color:#0F172A; font-size:10.5px;">{p_tit}</strong><br><span style="color:#64748B; font-size:9.5px;">📖 {p_jnl} • {p_yr}</span></td>
+            <td style="text-align:center;"><span style="background:{q_bg}; color:{q_fg}; border:1px solid {q_fg}; padding:2px 7px; border-radius:4px; font-weight:800; font-size:9.5px;">{p_q}</span></td>
+            <td style="text-align:center; font-weight:800; color:#D97706; font-size:10.5px;">⭐ {p_cit}</td>
+        </tr>
+        """
+
+    # Full papers table rows
+    all_papers_rows = ""
+    for idx, (_, row) in enumerate(author_papers_df.iterrows(), 1):
+        p_tit = row.get("title", "Untitled")
+        p_jnl = row.get("journal", "N/A")
+        p_yr = row.get("year", "")
+        p_q = row.get("quartile", "N/A")
+        p_cit = int(row.get("citations", 0))
+        
+        all_papers_rows += f"""
+        <tr>
+            <td style="text-align:center; color:#64748B;">{idx}</td>
+            <td style="font-weight:600; color:#0F172A;">{p_tit}</td>
+            <td style="color:#475569;">{p_jnl}</td>
+            <td style="text-align:center; color:#475569;">{p_yr}</td>
+            <td style="text-align:center; font-weight:700;">{p_q}</td>
+            <td style="text-align:center; font-weight:700; color:#0284C7;">{p_cit}</td>
+        </tr>
+        """
+
+    html = f"""<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Faculty Research Dossier - {author_name}</title>
+    <style>
+        @page {{ size: A4; margin: 10mm 12mm; }}
+        * {{ box-sizing: border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }}
+        body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #0F172A; background: #FFFFFF; margin: 0; padding: 10px; font-size: 10.5px; line-height: 1.35; }}
+        .header {{ display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #0284C7; padding-bottom: 8px; margin-bottom: 12px; }}
+        .inst-title {{ font-size: 16px; font-weight: 800; color: #0F172A; margin: 0; }}
+        .inst-sub {{ font-size: 10.5px; font-weight: 700; color: #0284C7; margin: 2px 0 0 0; }}
+        .badge-nirf {{ font-size: 9px; font-weight: 800; color: #D97706; text-transform: uppercase; text-align: right; line-height: 1.3; }}
+        .dossier-card {{ background: #F8FAFC; border: 1px solid #CBD5E1; border-radius: 6px; padding: 10px 14px; margin-bottom: 12px; }}
+        .kpi-grid {{ display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin: 8px 0; }}
+        .kpi-box {{ background: #FFFFFF; border: 1px solid #CBD5E1; border-radius: 5px; padding: 5px 6px; text-align: center; }}
+        .kpi-val {{ font-size: 14px; font-weight: 800; color: #0284C7; }}
+        .kpi-lbl {{ font-size: 8px; font-weight: 700; color: #64748B; text-transform: uppercase; }}
+        .pills {{ display: flex; gap: 6px; font-size: 9px; font-weight: 700; margin-top: 6px; flex-wrap: wrap; }}
+        .pill {{ padding: 2px 6px; border-radius: 4px; border: 1px solid #CBD5E1; background: #FFFFFF; }}
+        .section-title {{ font-size: 11.5px; font-weight: 800; color: #0F172A; border-bottom: 1px solid #CBD5E1; padding-bottom: 3px; margin: 14px 0 6px 0; }}
+        table {{ width: 100%; border-collapse: collapse; font-size: 9.5px; margin-top: 5px; }}
+        th {{ background: #F1F5F9; color: #334155; font-weight: 700; text-align: left; padding: 4px 5px; border: 1px solid #CBD5E1; }}
+        td {{ padding: 4px 5px; border: 1px solid #CBD5E1; vertical-align: middle; }}
+        tr:nth-child(even) {{ background: #F8FAFC; }}
+        .charts-row {{ display: flex; gap: 10px; margin-bottom: 12px; }}
+        .chart-box {{ flex: 1; border: 1px solid #CBD5E1; border-radius: 6px; padding: 6px; background: #FFFFFF; }}
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div>
+            <div class="inst-title">COEP Technological University, Pune</div>
+            <div class="inst-sub">Faculty Research Dossier & Scopus Bibliometric Impact Record</div>
+        </div>
+        <div class="badge-nirf">
+            NAAC A+ (CGPA 3.44)<br>NIRF Category: Engineering<br><span style="color:#0284C7;">IR-E-U-1257</span>
+        </div>
+    </div>
+
+    <div class="dossier-card">
+        <div style="font-size: 15px; font-weight: 800; color: #0F172A;">{author_name}</div>
+        <div style="font-size: 11px; font-weight: 700; color: #0284C7; margin-bottom: 2px;">🏛️ {dept} • Active {min_year}–{max_year}</div>
+        <div class="kpi-grid">
+            <div class="kpi-box"><div class="kpi-val">{total_pubs}</div><div class="kpi-lbl">Publications</div></div>
+            <div class="kpi-box"><div class="kpi-val">{total_cites:,}</div><div class="kpi-lbl">Total Citations</div></div>
+            <div class="kpi-box"><div class="kpi-val">{cpp}</div><div class="kpi-lbl">Citations / Pub</div></div>
+            <div class="kpi-box"><div class="kpi-val">{h_idx}</div><div class="kpi-lbl">Author h-Index</div></div>
+            <div class="kpi-box"><div class="kpi-val">{q1_pct}%</div><div class="kpi-lbl">Q1 Ratio</div></div>
+        </div>
+        <div class="pills">
+            <span class="pill" style="border-color:#F59E0B; color:#D97706;">🥇 {q1_count} Q1 Publications</span>
+            <span class="pill" style="border-color:#0284C7; color:#0284C7;">🌐 {intl_pct}% International Collab</span>
+            <span class="pill" style="border-color:#10B981; color:#059669;">🏢 {ind_pct}% Industry Partner</span>
+            <span style="margin-left:auto; color:#64748B;"><strong>Key Collaborators:</strong> {top_collabs}</span>
+        </div>
+    </div>
+
+    <div class="charts-row">
+        <div class="chart-box">
+            <div style="font-weight:700; font-size:10.5px; color:#0F172A; margin-bottom:3px;">📊 Publishing Velocity & Citation Trend</div>
+            <div style="font-size:9px; color:#64748B; margin-bottom:4px;"><span style="color:#0284C7;">■</span> Annual Publications &nbsp; <span style="color:#F59E0B;">●</span> Citations Accrued</div>
+            {trend_bars_svg}
+        </div>
+        <div class="chart-box">
+            <div style="font-weight:700; font-size:10.5px; color:#0F172A; margin-bottom:3px;">🍩 Journal Quartile Distribution</div>
+            <div style="margin-top:12px; font-size:9.5px;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:5px; font-weight:700;">
+                    <span style="color:#059669;">🥇 Q1 (Top 25%)</span><span>{q1} papers ({round(q1/max(total_pubs,1)*100,1)}%)</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:5px; font-weight:700;">
+                    <span style="color:#2563EB;">📘 Q2 (25%-50%)</span><span>{q2} papers ({round(q2/max(total_pubs,1)*100,1)}%)</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:5px; font-weight:700;">
+                    <span style="color:#D97706;">📙 Q3 (50%-75%)</span><span>{q3} papers ({round(q3/max(total_pubs,1)*100,1)}%)</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:5px; font-weight:700;">
+                    <span style="color:#DC2626;">📕 Q4 (75%-100%)</span><span>{q4} papers ({round(q4/max(total_pubs,1)*100,1)}%)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-title">🌟 Top Landmark Contributions by {author_name}</div>
+    <table>
+        <thead>
+            <tr><th style="width:35px; text-align:center;">Rank</th><th>Paper Title & Source</th><th style="width:55px; text-align:center;">Quartile</th><th style="width:70px; text-align:center;">Citations</th></tr>
+        </thead>
+        <tbody>{top5_rows}</tbody>
+    </table>
+
+    <div class="section-title">📄 Publications Directory ({len(author_papers_df)} Articles)</div>
+    <table>
+        <thead>
+            <tr><th style="width:25px; text-align:center;">#</th><th>Article Title</th><th>Journal / Conference</th><th style="width:45px; text-align:center;">Year</th><th style="width:45px; text-align:center;">Quartile</th><th style="width:55px; text-align:center;">Citations</th></tr>
+        </thead>
+        <tbody>{all_papers_rows}</tbody>
+    </table>
+</body>
+</html>"""
+    return html
+
