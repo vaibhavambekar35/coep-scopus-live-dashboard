@@ -1,0 +1,102 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <style>
+    body { font-family: Inter, sans-serif; background: #f8fafc; padding: 20px; }
+    .card { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; width: 680px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+    .title { font-size: 15px; font-weight: 700; color: #0C3967; margin-bottom: 4px; }
+    .sub { font-size: 12px; color: #64748b; margin-bottom: 12px; }
+    #plot { width: 100%; height: 380px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="title">🎯 Impact vs. Volume Quadrant Matrix (Bubble Scale = Total Citations)</div>
+    <div class="sub">Departmental citation density vs volume benchmarking</div>
+    <div id="plot"></div>
+  </div>
+  <script>
+    const data = [{"fullName": "Electronics & Telecommunication (E&TC)", "shortName": "E&TC", "pos": "top right", "pubs": 311, "cpp": 6.967845659163987, "cites": 2167, "q1_pct": 9.32475884244373}, {"fullName": "Metallurgical & Materials Engineering", "shortName": "Metallurgy", "pos": "bottom center", "pubs": 101, "cpp": 6.2772277227722775, "cites": 634, "q1_pct": 16.831683168316832}, {"fullName": "Computer Engineering & IT", "shortName": "Computer & IT", "pos": "bottom center", "pubs": 759, "cpp": 7.758893280632411, "cites": 5889, "q1_pct": 9.881422924901186}, {"fullName": "Mechanical Engineering", "shortName": "Mechanical", "pos": "top center", "pubs": 1211, "cpp": 11.61849710982659, "cites": 14070, "q1_pct": 9.413707679603633}, {"fullName": "Manufacturing & Industrial Engineering", "shortName": "Mfg & Ind", "pos": "top center", "pubs": 61, "cpp": 7.0, "cites": 427, "q1_pct": 14.754098360655737}, {"fullName": "Civil & Environmental Engineering", "shortName": "Civil Eng", "pos": "middle right", "pubs": 67, "cpp": 2.8208955223880596, "cites": 189, "q1_pct": 8.955223880597014}, {"fullName": "Electrical Engineering", "shortName": "Electrical", "pos": "top right", "pubs": 142, "cpp": 6.366197183098592, "cites": 904, "q1_pct": 6.338028169014084}, {"fullName": "Physics & Applied Materials", "shortName": "Physics", "pos": "top right", "pubs": 12, "cpp": 5.75, "cites": 69, "q1_pct": 25.0}, {"fullName": "Applied Sciences & Mathematics", "shortName": "Applied Math", "pos": "top right", "pubs": 15, "cpp": 20.4, "cites": 306, "q1_pct": 13.333333333333334}, {"fullName": "Chemistry & Chemical Sciences", "shortName": "Chemistry", "pos": "bottom right", "pubs": 9, "cpp": 2.2222222222222223, "cites": 20, "q1_pct": 11.11111111111111}, {"fullName": "Instrumentation & Control Engineering", "shortName": "Instrumentation", "pos": "bottom right", "pubs": 106, "cpp": 18.764150943396228, "cites": 1989, "q1_pct": 9.433962264150944}];
+    const avgCpp = 9.543307086614174;
+    const maxPubs = 1211;
+
+    const trace = {
+      x: data.map(d => d.pubs),
+      y: data.map(d => d.cpp),
+      text: data.map(d => d.shortName),
+      customdata: data.map(d => d.fullName),
+      mode: "markers+text",
+      textposition: data.map(d => d.pos),
+      textfont: { size: 10.5, color: "#0D111A", family: "Inter, sans-serif" },
+      cliponaxis: false,
+      marker: {
+        size: data.map(d => d.cites),
+        sizemode: "area",
+        sizeref: 2.0 * 14070 / (42 ** 2),
+        sizemin: 7,
+        color: data.map(d => d.q1_pct),
+        colorscale: [
+          [0.0, "#0C3967"],
+          [0.5, "#238B57"],
+          [1.0, "#FB9611"]
+        ],
+        colorbar: {
+          title: "Q1 %",
+          thickness: 12,
+          len: 0.75,
+          tickfont: { size: 10 }
+        }
+      },
+      hovertemplate: "<b>%{customdata}</b><br>" +
+        "• Publications: <b>%{x}</b><br>" +
+        "• Citation Density: <b>%{y:.2f}</b> CPP<br>" +
+        "• Total Citations: <b>%{marker.size:,}</b><br>" +
+        "• Q1 Journal Share: <b>%{marker.color:.1f}%</b><extra></extra>"
+    };
+
+    const layout = {
+      paper_bgcolor: "rgba(0,0,0,0)",
+      plot_bgcolor: "rgba(0,0,0,0)",
+      font: { family: "Inter, sans-serif", size: 11, color: "#0D111A" },
+      xaxis: {
+        title: "Total Publication Volume (Papers)",
+        range: [-25, maxPubs * 1.12],
+        gridcolor: "rgba(216, 225, 232, 0.7)",
+        zerolinecolor: "rgba(216, 225, 232, 0.9)"
+      },
+      yaxis: {
+        title: "Average Citations Per Paper (CPP)",
+        range: [0, 23],
+        gridcolor: "rgba(216, 225, 232, 0.7)",
+        zerolinecolor: "rgba(216, 225, 232, 0.9)"
+      },
+      shapes: [{
+        type: "line",
+        x0: -25,
+        x1: maxPubs * 1.12,
+        y0: avgCpp,
+        y1: avgCpp,
+        line: { color: "#FB9611", width: 2, dash: "dash" }
+      }],
+      annotations: [{
+        x: maxPubs * 0.45,
+        y: avgCpp + 0.65,
+        text: "<b>Benchmark Avg CPP: " + avgCpp.toFixed(2) + "</b>",
+        showarrow: false,
+        xanchor: "center",
+        yanchor: "bottom",
+        font: { color: "#FB9611", size: 11, family: "Inter, sans-serif" },
+        bgcolor: "rgba(255, 255, 255, 0.95)",
+        bordercolor: "#FB9611",
+        borderwidth: 1,
+        borderpad: 4
+      }],
+      margin: { t: 25, r: 25, l: 55, b: 45 }
+    };
+
+    Plotly.newPlot("plot", [trace], layout, { responsive: true, displayModeBar: false });
+  </script>
+</body>
+</html>

@@ -731,12 +731,12 @@ with st.sidebar:
 
         affil_query = st.text_input(
             "Affiliation Query",
-            value=os.getenv("SCOPUS_AFFIL_QUERY", "AF-ID(60009476) OR AFFIL({COEP Technological University}) OR AFFIL({College of Engineering Pune}) OR AFFIL({College of Engineering Poona}) OR AFFIL({COEP Pune}) OR AFFIL({COEP Tech})")
+            value=os.getenv("SCOPUS_AFFIL_QUERY", "AF-ID(60069506)")
         )
 
         max_fetch_choice = st.selectbox(
             "Fetch Volume",
-            options=[3000, 1500, 500, 1000],
+            options=[5000, 4633, 3000, 1500, 1000, 500],
             index=0,
             format_func=lambda x: f"Full Archive (~{x} papers)" if x >= 3000 else f"Latest {x} papers"
         )
