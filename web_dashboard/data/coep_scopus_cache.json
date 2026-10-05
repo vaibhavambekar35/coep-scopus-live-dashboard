@@ -1,5 +1,5 @@
 {
-  "last_synced": "2026-10-05T17:49:43.824456",
+  "last_synced": "2026-10-05T23:41:24.265536",
   "affiliation_id": "60069506",
   "institution": "COEP Technological University, Pune",
   "sync_frequency_minutes": 60,
@@ -26398,50 +26398,6 @@
       "abstract": "Scopus indexed publication from COEP Technological University on Regenerative Braking-Aware Longitudinal Slip Control Strategy for Hub Motor Electric Two-Wheelers on Variable Friction Surfaces."
     },
     {
-      "id": "105013619607",
-      "eid": "2-s2.0-105013619607",
-      "scopus_id": "105013619607",
-      "title": "Design and Performance Analysis of a Tiny Water Propulsion Propeller Using CFD Simulation",
-      "authors": [
-        "Patil V.G."
-      ],
-      "authors_str": "Patil V.G.",
-      "coep_authors": [
-        "Patil V.G."
-      ],
-      "primary_author": "Patil V.G.",
-      "department": "Computer Engineering & IT",
-      "journal": "Proceedings of the 6th International Conference on Inventive Research in Computing Applications Icirca 2025",
-      "issn": "",
-      "publisher": "Academic Publisher",
-      "publication_date": "2025-01-01",
-      "year": 2025,
-      "month": "January",
-      "month_num": 1,
-      "doi": "10.1109/ICIRCA65293.2025.11089886",
-      "doi_url": "https://doi.org/10.1109/ICIRCA65293.2025.11089886",
-      "scopus_url": "https://www.scopus.com/inward/record.uri?partnerID=HzOxMe3b&scp=105013619607&origin=inward",
-      "citations": 0,
-      "citescore": 3.8,
-      "sjr": 0.45,
-      "quartile": "Q3",
-      "is_top_10_percent": false,
-      "collaboration_type": "Institutional",
-      "is_international_collab": false,
-      "is_industry_collab": false,
-      "collaborating_countries": [
-        "India"
-      ],
-      "foreign_countries": [],
-      "collaborating_institutions": [
-        "COEP Technological University, Pune"
-      ],
-      "external_institutions": [],
-      "document_type": "Conference Paper",
-      "open_access": false,
-      "abstract": "Scopus indexed publication from COEP Technological University on Design and Performance Analysis of a Tiny Water Propulsion Propeller Using CFD Simulation."
-    },
-    {
       "id": "105002282401",
       "eid": "2-s2.0-105002282401",
       "scopus_id": "105002282401",
@@ -26484,6 +26440,50 @@
       "document_type": "Conference Paper",
       "open_access": false,
       "abstract": "Scopus indexed publication from COEP Technological University on Optimizing Grid Resilience and Sustainability with Renewable Energy and Battery Energy Storage Systems.."
+    },
+    {
+      "id": "105013619607",
+      "eid": "2-s2.0-105013619607",
+      "scopus_id": "105013619607",
+      "title": "Design and Performance Analysis of a Tiny Water Propulsion Propeller Using CFD Simulation",
+      "authors": [
+        "Patil V.G."
+      ],
+      "authors_str": "Patil V.G.",
+      "coep_authors": [
+        "Patil V.G."
+      ],
+      "primary_author": "Patil V.G.",
+      "department": "Computer Engineering & IT",
+      "journal": "Proceedings of the 6th International Conference on Inventive Research in Computing Applications Icirca 2025",
+      "issn": "",
+      "publisher": "Academic Publisher",
+      "publication_date": "2025-01-01",
+      "year": 2025,
+      "month": "January",
+      "month_num": 1,
+      "doi": "10.1109/ICIRCA65293.2025.11089886",
+      "doi_url": "https://doi.org/10.1109/ICIRCA65293.2025.11089886",
+      "scopus_url": "https://www.scopus.com/inward/record.uri?partnerID=HzOxMe3b&scp=105013619607&origin=inward",
+      "citations": 0,
+      "citescore": 3.8,
+      "sjr": 0.45,
+      "quartile": "Q3",
+      "is_top_10_percent": false,
+      "collaboration_type": "Institutional",
+      "is_international_collab": false,
+      "is_industry_collab": false,
+      "collaborating_countries": [
+        "India"
+      ],
+      "foreign_countries": [],
+      "collaborating_institutions": [
+        "COEP Technological University, Pune"
+      ],
+      "external_institutions": [],
+      "document_type": "Conference Paper",
+      "open_access": false,
+      "abstract": "Scopus indexed publication from COEP Technological University on Design and Performance Analysis of a Tiny Water Propulsion Propeller Using CFD Simulation."
     },
     {
       "id": "105036356270",
@@ -62290,50 +62290,6 @@
       "abstract": "Scopus indexed publication from COEP Technological University on Comparative Analysis of Performance of Different Speed Controllers for FOC Based SVPWM fed PMSM Drive."
     },
     {
-      "id": "85152076056",
-      "eid": "2-s2.0-85152076056",
-      "scopus_id": "85152076056",
-      "title": "Leveraging YOLOv7 for Plant Disease Detection",
-      "authors": [
-        "Vaidya S."
-      ],
-      "authors_str": "Vaidya S.",
-      "coep_authors": [
-        "Vaidya S."
-      ],
-      "primary_author": "Vaidya S.",
-      "department": "Mechanical Engineering",
-      "journal": "2023 International Conference on Innovative Trends in Information Technology Icitiit 2023",
-      "issn": "",
-      "publisher": "Academic Publisher",
-      "publication_date": "2023-01-01",
-      "year": 2023,
-      "month": "January",
-      "month_num": 1,
-      "doi": "10.1109/ICITIIT57246.2023.10068590",
-      "doi_url": "https://doi.org/10.1109/ICITIIT57246.2023.10068590",
-      "scopus_url": "https://www.scopus.com/inward/record.uri?partnerID=HzOxMe3b&scp=85152076056&origin=inward",
-      "citations": 19,
-      "citescore": 3.8,
-      "sjr": 0.45,
-      "quartile": "Q3",
-      "is_top_10_percent": false,
-      "collaboration_type": "Institutional",
-      "is_international_collab": false,
-      "is_industry_collab": false,
-      "collaborating_countries": [
-        "India"
-      ],
-      "foreign_countries": [],
-      "collaborating_institutions": [
-        "COEP Technological University, Pune"
-      ],
-      "external_institutions": [],
-      "document_type": "Conference Paper",
-      "open_access": false,
-      "abstract": "Scopus indexed publication from COEP Technological University on Leveraging YOLOv7 for Plant Disease Detection."
-    },
-    {
       "id": "85183396444",
       "eid": "2-s2.0-85183396444",
       "scopus_id": "85183396444",
@@ -62420,6 +62376,50 @@
       "document_type": "Conference Paper",
       "open_access": false,
       "abstract": "Scopus indexed publication from COEP Technological University on Development and Testing of End-of-Line (EOL) Tester for Diesel Engine."
+    },
+    {
+      "id": "85152076056",
+      "eid": "2-s2.0-85152076056",
+      "scopus_id": "85152076056",
+      "title": "Leveraging YOLOv7 for Plant Disease Detection",
+      "authors": [
+        "Vaidya S."
+      ],
+      "authors_str": "Vaidya S.",
+      "coep_authors": [
+        "Vaidya S."
+      ],
+      "primary_author": "Vaidya S.",
+      "department": "Mechanical Engineering",
+      "journal": "2023 International Conference on Innovative Trends in Information Technology Icitiit 2023",
+      "issn": "",
+      "publisher": "Academic Publisher",
+      "publication_date": "2023-01-01",
+      "year": 2023,
+      "month": "January",
+      "month_num": 1,
+      "doi": "10.1109/ICITIIT57246.2023.10068590",
+      "doi_url": "https://doi.org/10.1109/ICITIIT57246.2023.10068590",
+      "scopus_url": "https://www.scopus.com/inward/record.uri?partnerID=HzOxMe3b&scp=85152076056&origin=inward",
+      "citations": 19,
+      "citescore": 3.8,
+      "sjr": 0.45,
+      "quartile": "Q3",
+      "is_top_10_percent": false,
+      "collaboration_type": "Institutional",
+      "is_international_collab": false,
+      "is_industry_collab": false,
+      "collaborating_countries": [
+        "India"
+      ],
+      "foreign_countries": [],
+      "collaborating_institutions": [
+        "COEP Technological University, Pune"
+      ],
+      "external_institutions": [],
+      "document_type": "Conference Paper",
+      "open_access": false,
+      "abstract": "Scopus indexed publication from COEP Technological University on Leveraging YOLOv7 for Plant Disease Detection."
     },
     {
       "id": "85174634307",
@@ -70273,6 +70273,50 @@
       "abstract": "Scopus indexed publication from COEP Technological University on Towards Fast Nonlinear Model Predictive Control for Embedded Applications."
     },
     {
+      "id": "85142802696",
+      "eid": "2-s2.0-85142802696",
+      "scopus_id": "85142802696",
+      "title": "Analysis of facial expressions in Indian histrionics using a Petri-net verified process and a state model",
+      "authors": [
+        "Kale M."
+      ],
+      "authors_str": "Kale M.",
+      "coep_authors": [
+        "Kale M."
+      ],
+      "primary_author": "Kale M.",
+      "department": "Mechanical Engineering",
+      "journal": "Sadhana Academy Proceedings in Engineering Sciences",
+      "issn": "02562499",
+      "publisher": "Academic Publisher",
+      "publication_date": "2022-12-01",
+      "year": 2022,
+      "month": "December",
+      "month_num": 12,
+      "doi": "10.1007/s12046-022-02030-x",
+      "doi_url": "https://doi.org/10.1007/s12046-022-02030-x",
+      "scopus_url": "https://www.scopus.com/inward/record.uri?partnerID=HzOxMe3b&scp=85142802696&origin=inward",
+      "citations": 1,
+      "citescore": 16.5,
+      "sjr": 2.85,
+      "quartile": "Q1",
+      "is_top_10_percent": true,
+      "collaboration_type": "Institutional",
+      "is_international_collab": false,
+      "is_industry_collab": false,
+      "collaborating_countries": [
+        "India"
+      ],
+      "foreign_countries": [],
+      "collaborating_institutions": [
+        "COEP Technological University, Pune"
+      ],
+      "external_institutions": [],
+      "document_type": "Article",
+      "open_access": false,
+      "abstract": "Scopus indexed publication from COEP Technological University on Analysis of facial expressions in Indian histrionics using a Petri-net verified process and a state model."
+    },
+    {
       "id": "85135164659",
       "eid": "2-s2.0-85135164659",
       "scopus_id": "85135164659",
@@ -70321,50 +70365,6 @@
       "document_type": "Article",
       "open_access": false,
       "abstract": "Scopus indexed publication from COEP Technological University on Qualitative Results for Nonlinear Integro-Dynamic Equations via Integral Inequalities."
-    },
-    {
-      "id": "85142802696",
-      "eid": "2-s2.0-85142802696",
-      "scopus_id": "85142802696",
-      "title": "Analysis of facial expressions in Indian histrionics using a Petri-net verified process and a state model",
-      "authors": [
-        "Kale M."
-      ],
-      "authors_str": "Kale M.",
-      "coep_authors": [
-        "Kale M."
-      ],
-      "primary_author": "Kale M.",
-      "department": "Mechanical Engineering",
-      "journal": "Sadhana Academy Proceedings in Engineering Sciences",
-      "issn": "02562499",
-      "publisher": "Academic Publisher",
-      "publication_date": "2022-12-01",
-      "year": 2022,
-      "month": "December",
-      "month_num": 12,
-      "doi": "10.1007/s12046-022-02030-x",
-      "doi_url": "https://doi.org/10.1007/s12046-022-02030-x",
-      "scopus_url": "https://www.scopus.com/inward/record.uri?partnerID=HzOxMe3b&scp=85142802696&origin=inward",
-      "citations": 1,
-      "citescore": 16.5,
-      "sjr": 2.85,
-      "quartile": "Q1",
-      "is_top_10_percent": true,
-      "collaboration_type": "Institutional",
-      "is_international_collab": false,
-      "is_industry_collab": false,
-      "collaborating_countries": [
-        "India"
-      ],
-      "foreign_countries": [],
-      "collaborating_institutions": [
-        "COEP Technological University, Pune"
-      ],
-      "external_institutions": [],
-      "document_type": "Article",
-      "open_access": false,
-      "abstract": "Scopus indexed publication from COEP Technological University on Analysis of facial expressions in Indian histrionics using a Petri-net verified process and a state model."
     },
     {
       "id": "85143838342",
@@ -76513,50 +76513,6 @@
       "abstract": "Scopus indexed publication from COEP Technological University on Reasoning the social benefits of mixed land-use and population density in an Indian city."
     },
     {
-      "id": "85143760142",
-      "eid": "2-s2.0-85143760142",
-      "scopus_id": "85143760142",
-      "title": "Designing a Microstrip Band Pass Filter for 5G Applications",
-      "authors": [
-        "Khedekar C.B."
-      ],
-      "authors_str": "Khedekar C.B.",
-      "coep_authors": [
-        "Khedekar C.B."
-      ],
-      "primary_author": "Khedekar C.B.",
-      "department": "Electronics & Telecommunication (E&TC)",
-      "journal": "2022 International Conference on Industry 4 0 Technology I4tech 2022",
-      "issn": "",
-      "publisher": "Academic Publisher",
-      "publication_date": "2022-01-01",
-      "year": 2022,
-      "month": "January",
-      "month_num": 1,
-      "doi": "10.1109/I4Tech55392.2022.9952904",
-      "doi_url": "https://doi.org/10.1109/I4Tech55392.2022.9952904",
-      "scopus_url": "https://www.scopus.com/inward/record.uri?partnerID=HzOxMe3b&scp=85143760142&origin=inward",
-      "citations": 3,
-      "citescore": 3.8,
-      "sjr": 0.45,
-      "quartile": "Q3",
-      "is_top_10_percent": false,
-      "collaboration_type": "Institutional",
-      "is_international_collab": false,
-      "is_industry_collab": false,
-      "collaborating_countries": [
-        "India"
-      ],
-      "foreign_countries": [],
-      "collaborating_institutions": [
-        "COEP Technological University, Pune"
-      ],
-      "external_institutions": [],
-      "document_type": "Conference Paper",
-      "open_access": false,
-      "abstract": "Scopus indexed publication from COEP Technological University on Designing a Microstrip Band Pass Filter for 5G Applications."
-    },
-    {
       "id": "85109042536",
       "eid": "2-s2.0-85109042536",
       "scopus_id": "85109042536",
@@ -76599,6 +76555,50 @@
       "document_type": "Article",
       "open_access": false,
       "abstract": "Scopus indexed publication from COEP Technological University on A review on weight initialization strategies for neural networks."
+    },
+    {
+      "id": "85143760142",
+      "eid": "2-s2.0-85143760142",
+      "scopus_id": "85143760142",
+      "title": "Designing a Microstrip Band Pass Filter for 5G Applications",
+      "authors": [
+        "Khedekar C.B."
+      ],
+      "authors_str": "Khedekar C.B.",
+      "coep_authors": [
+        "Khedekar C.B."
+      ],
+      "primary_author": "Khedekar C.B.",
+      "department": "Electronics & Telecommunication (E&TC)",
+      "journal": "2022 International Conference on Industry 4 0 Technology I4tech 2022",
+      "issn": "",
+      "publisher": "Academic Publisher",
+      "publication_date": "2022-01-01",
+      "year": 2022,
+      "month": "January",
+      "month_num": 1,
+      "doi": "10.1109/I4Tech55392.2022.9952904",
+      "doi_url": "https://doi.org/10.1109/I4Tech55392.2022.9952904",
+      "scopus_url": "https://www.scopus.com/inward/record.uri?partnerID=HzOxMe3b&scp=85143760142&origin=inward",
+      "citations": 3,
+      "citescore": 3.8,
+      "sjr": 0.45,
+      "quartile": "Q3",
+      "is_top_10_percent": false,
+      "collaboration_type": "Institutional",
+      "is_international_collab": false,
+      "is_industry_collab": false,
+      "collaborating_countries": [
+        "India"
+      ],
+      "foreign_countries": [],
+      "collaborating_institutions": [
+        "COEP Technological University, Pune"
+      ],
+      "external_institutions": [],
+      "document_type": "Conference Paper",
+      "open_access": false,
+      "abstract": "Scopus indexed publication from COEP Technological University on Designing a Microstrip Band Pass Filter for 5G Applications."
     },
     {
       "id": "85145432893",
@@ -83361,30 +83361,30 @@
       "abstract": "Scopus indexed publication from COEP Technological University on Design and Implementation of UWB MIMO Microstrip Antenna for Sub-6GHz 5G Communication."
     },
     {
-      "id": "85146284294",
-      "eid": "2-s2.0-85146284294",
-      "scopus_id": "85146284294",
-      "title": "Self-Powered MEMS Sensor System for Monitoring of Ocean Parameters",
+      "id": "85137273803",
+      "eid": "2-s2.0-85137273803",
+      "scopus_id": "85137273803",
+      "title": "Mismatched Disturbance Estimation Based Sliding Mode Control of DC-DC Power Converter",
       "authors": [
-        "Dhangar P."
+        "Malge S.V."
       ],
-      "authors_str": "Dhangar P.",
+      "authors_str": "Malge S.V.",
       "coep_authors": [
-        "Dhangar P."
+        "Malge S.V."
       ],
-      "primary_author": "Dhangar P.",
-      "department": "Instrumentation & Control Engineering",
-      "journal": "Proceedings 2022 3rd International Conference on Computation Automation and Knowledge Management Iccakm 2022",
+      "primary_author": "Malge S.V.",
+      "department": "Electrical Engineering",
+      "journal": "2022 2nd International Conference on Intelligent Technologies Conit 2022",
       "issn": "",
       "publisher": "Academic Publisher",
       "publication_date": "2022-01-01",
       "year": 2022,
       "month": "January",
       "month_num": 1,
-      "doi": "10.1109/ICCAKM54721.2022.9990163",
-      "doi_url": "https://doi.org/10.1109/ICCAKM54721.2022.9990163",
-      "scopus_url": "https://www.scopus.com/inward/record.uri?partnerID=HzOxMe3b&scp=85146284294&origin=inward",
-      "citations": 2,
+      "doi": "10.1109/CONIT55038.2022.9848317",
+      "doi_url": "https://doi.org/10.1109/CONIT55038.2022.9848317",
+      "scopus_url": "https://www.scopus.com/inward/record.uri?partnerID=HzOxMe3b&scp=85137273803&origin=inward",
+      "citations": 6,
       "citescore": 3.8,
       "sjr": 0.45,
       "quartile": "Q3",
@@ -83402,7 +83402,7 @@
       "external_institutions": [],
       "document_type": "Conference Paper",
       "open_access": false,
-      "abstract": "Scopus indexed publication from COEP Technological University on Self-Powered MEMS Sensor System for Monitoring of Ocean Parameters."
+      "abstract": "Scopus indexed publication from COEP Technological University on Mismatched Disturbance Estimation Based Sliding Mode Control of DC-DC Power Converter."
     },
     {
       "id": "85146317058",
@@ -110507,50 +110507,6 @@
       "abstract": "Scopus indexed publication from COEP Technological University on HARDWARE ACCELERATOR: IMPLEMENTATION of CNN on FPGA for DIGIT RECOGNITION."
     },
     {
-      "id": "85078213705",
-      "eid": "2-s2.0-85078213705",
-      "scopus_id": "85078213705",
-      "title": "Pixel level fusion techniques for SAR and optical images: A review",
-      "authors": [
-        "Kulkarni S.C."
-      ],
-      "authors_str": "Kulkarni S.C.",
-      "coep_authors": [
-        "Kulkarni S.C."
-      ],
-      "primary_author": "Kulkarni S.C.",
-      "department": "Mechanical Engineering",
-      "journal": "Information Fusion",
-      "issn": "15662535",
-      "publisher": "Academic Publisher",
-      "publication_date": "2020-07-01",
-      "year": 2020,
-      "month": "July",
-      "month_num": 7,
-      "doi": "10.1016/j.inffus.2020.01.003",
-      "doi_url": "https://doi.org/10.1016/j.inffus.2020.01.003",
-      "scopus_url": "https://www.scopus.com/inward/record.uri?partnerID=HzOxMe3b&scp=85078213705&origin=inward",
-      "citations": 327,
-      "citescore": 2.5,
-      "sjr": 0.3,
-      "quartile": "Q3",
-      "is_top_10_percent": true,
-      "collaboration_type": "Institutional",
-      "is_international_collab": false,
-      "is_industry_collab": false,
-      "collaborating_countries": [
-        "India"
-      ],
-      "foreign_countries": [],
-      "collaborating_institutions": [
-        "COEP Technological University, Pune"
-      ],
-      "external_institutions": [],
-      "document_type": "Article",
-      "open_access": false,
-      "abstract": "Scopus indexed publication from COEP Technological University on Pixel level fusion techniques for SAR and optical images: A review."
-    },
-    {
       "id": "85096525041",
       "eid": "2-s2.0-85096525041",
       "scopus_id": "85096525041",
@@ -110593,6 +110549,50 @@
       "document_type": "Conference Paper",
       "open_access": false,
       "abstract": "Scopus indexed publication from COEP Technological University on Optimization of Memory Oriented Network-on-Chip for FPGA."
+    },
+    {
+      "id": "85078213705",
+      "eid": "2-s2.0-85078213705",
+      "scopus_id": "85078213705",
+      "title": "Pixel level fusion techniques for SAR and optical images: A review",
+      "authors": [
+        "Kulkarni S.C."
+      ],
+      "authors_str": "Kulkarni S.C.",
+      "coep_authors": [
+        "Kulkarni S.C."
+      ],
+      "primary_author": "Kulkarni S.C.",
+      "department": "Mechanical Engineering",
+      "journal": "Information Fusion",
+      "issn": "15662535",
+      "publisher": "Academic Publisher",
+      "publication_date": "2020-07-01",
+      "year": 2020,
+      "month": "July",
+      "month_num": 7,
+      "doi": "10.1016/j.inffus.2020.01.003",
+      "doi_url": "https://doi.org/10.1016/j.inffus.2020.01.003",
+      "scopus_url": "https://www.scopus.com/inward/record.uri?partnerID=HzOxMe3b&scp=85078213705&origin=inward",
+      "citations": 327,
+      "citescore": 2.5,
+      "sjr": 0.3,
+      "quartile": "Q3",
+      "is_top_10_percent": true,
+      "collaboration_type": "Institutional",
+      "is_international_collab": false,
+      "is_industry_collab": false,
+      "collaborating_countries": [
+        "India"
+      ],
+      "foreign_countries": [],
+      "collaborating_institutions": [
+        "COEP Technological University, Pune"
+      ],
+      "external_institutions": [],
+      "document_type": "Article",
+      "open_access": false,
+      "abstract": "Scopus indexed publication from COEP Technological University on Pixel level fusion techniques for SAR and optical images: A review."
     },
     {
       "id": "85096551462",
