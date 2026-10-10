@@ -1,5 +1,5 @@
 {
-  "last_synced": "2026-10-10T15:01:22.007539",
+  "last_synced": "2026-10-10T19:14:03.763920",
   "affiliation_id": "60069506",
   "institution": "COEP Technological University, Pune",
   "sync_frequency_minutes": 60,
@@ -13636,35 +13636,35 @@
       "abstract": "Scopus indexed publication from COEP Technological University on Optimization of Deep Learning Experiments Using Taguchi Method Applied to Facial Expression Recognition Task."
     },
     {
-      "id": "105031693789",
-      "eid": "2-s2.0-105031693789",
-      "scopus_id": "105031693789",
-      "title": "Complexity of deciding the equality of domination parameters in chordal graphs",
+      "id": "105052190795",
+      "eid": "2-s2.0-105052190795",
+      "scopus_id": "105052190795",
+      "title": "Robust Performance Evaluation and Comparative Analysis of Metaheuristic-Tuned FOC PMSM Drives under Diverse Dynamic Conditions",
       "authors": [
-        "Bakal D.M."
+        "Thasale S.S."
       ],
-      "authors_str": "Bakal D.M.",
+      "authors_str": "Thasale S.S.",
       "coep_authors": [
-        "Bakal D.M."
+        "Thasale S.S."
       ],
-      "primary_author": "Bakal D.M.",
-      "department": "Computer Engineering & IT",
-      "journal": "International Journal of Computer Mathematics Computer Systems Theory",
-      "issn": "23799927",
+      "primary_author": "Thasale S.S.",
+      "department": "Electronics & Telecommunication (E&TC)",
+      "journal": "2026 IEEE 6th International Conference on Sustainable Energy and Future Electric Transportation Sefet 2026",
+      "issn": "",
       "publisher": "Academic Publisher",
       "publication_date": "2026-01-01",
       "year": 2026,
       "month": "January",
       "month_num": 1,
-      "doi": "10.1080/23799927.2026.2629390",
-      "doi_url": "https://doi.org/10.1080/23799927.2026.2629390",
-      "scopus_url": "https://www.scopus.com/inward/record.uri?partnerID=HzOxMe3b&scp=105031693789&origin=inward",
+      "doi": "10.1109/SEFET69291.2026.11687140",
+      "doi_url": "https://doi.org/10.1109/SEFET69291.2026.11687140",
+      "scopus_url": "https://www.scopus.com/inward/record.uri?partnerID=HzOxMe3b&scp=105052190795&origin=inward",
       "citations": 0,
       "citescore": 7.2,
       "sjr": 0.98,
       "quartile": "Q2",
       "is_top_10_percent": false,
-      "collaboration_type": "National",
+      "collaboration_type": "Institutional",
       "is_international_collab": false,
       "is_industry_collab": false,
       "collaborating_countries": [
@@ -13672,15 +13672,12 @@
       ],
       "foreign_countries": [],
       "collaborating_institutions": [
-        "COEP Technological University, Pune",
-        "Savitribai Phule Pune University"
+        "COEP Technological University, Pune"
       ],
-      "external_institutions": [
-        "Savitribai Phule Pune University"
-      ],
-      "document_type": "Article",
+      "external_institutions": [],
+      "document_type": "Conference Paper",
       "open_access": false,
-      "abstract": "Scopus indexed publication from COEP Technological University on Complexity of deciding the equality of domination parameters in chordal graphs."
+      "abstract": "Scopus indexed publication from COEP Technological University on Robust Performance Evaluation and Comparative Analysis of Metaheuristic-Tuned FOC PMSM Drives under Diverse Dynamic Conditions."
     },
     {
       "id": "105044205337",
@@ -28455,6 +28452,50 @@
       "abstract": "Scopus indexed publication from COEP Technological University on Determination of the most significant features for hyperglycemia detection and their extraction from electrocardiogram signal."
     },
     {
+      "id": "105013616591",
+      "eid": "2-s2.0-105013616591",
+      "scopus_id": "105013616591",
+      "title": "Predicting Smartphone Addiction Using Behavioral and Psychological Traits with Machine Learning",
+      "authors": [
+        "Pawar V."
+      ],
+      "authors_str": "Pawar V.",
+      "coep_authors": [
+        "Pawar V."
+      ],
+      "primary_author": "Pawar V.",
+      "department": "Computer Engineering & IT",
+      "journal": "2025 Global Conference in Emerging Technology Ginotech 2025",
+      "issn": "",
+      "publisher": "Academic Publisher",
+      "publication_date": "2025-01-01",
+      "year": 2025,
+      "month": "January",
+      "month_num": 1,
+      "doi": "10.1109/GINOTECH63460.2025.11077064",
+      "doi_url": "https://doi.org/10.1109/GINOTECH63460.2025.11077064",
+      "scopus_url": "https://www.scopus.com/inward/record.uri?partnerID=HzOxMe3b&scp=105013616591&origin=inward",
+      "citations": 4,
+      "citescore": 3.8,
+      "sjr": 0.45,
+      "quartile": "Q3",
+      "is_top_10_percent": false,
+      "collaboration_type": "Institutional",
+      "is_international_collab": false,
+      "is_industry_collab": false,
+      "collaborating_countries": [
+        "India"
+      ],
+      "foreign_countries": [],
+      "collaborating_institutions": [
+        "COEP Technological University, Pune"
+      ],
+      "external_institutions": [],
+      "document_type": "Conference Paper",
+      "open_access": false,
+      "abstract": "Scopus indexed publication from COEP Technological University on Predicting Smartphone Addiction Using Behavioral and Psychological Traits with Machine Learning."
+    },
+    {
       "id": "105034665290",
       "eid": "2-s2.0-105034665290",
       "scopus_id": "105034665290",
@@ -28500,50 +28541,6 @@
       "document_type": "Conference Paper",
       "open_access": false,
       "abstract": "Scopus indexed publication from COEP Technological University on Energy Aware GPU Kernel Optimization: A Hierarchical Approach."
-    },
-    {
-      "id": "105013616591",
-      "eid": "2-s2.0-105013616591",
-      "scopus_id": "105013616591",
-      "title": "Predicting Smartphone Addiction Using Behavioral and Psychological Traits with Machine Learning",
-      "authors": [
-        "Pawar V."
-      ],
-      "authors_str": "Pawar V.",
-      "coep_authors": [
-        "Pawar V."
-      ],
-      "primary_author": "Pawar V.",
-      "department": "Computer Engineering & IT",
-      "journal": "2025 Global Conference in Emerging Technology Ginotech 2025",
-      "issn": "",
-      "publisher": "Academic Publisher",
-      "publication_date": "2025-01-01",
-      "year": 2025,
-      "month": "January",
-      "month_num": 1,
-      "doi": "10.1109/GINOTECH63460.2025.11077064",
-      "doi_url": "https://doi.org/10.1109/GINOTECH63460.2025.11077064",
-      "scopus_url": "https://www.scopus.com/inward/record.uri?partnerID=HzOxMe3b&scp=105013616591&origin=inward",
-      "citations": 4,
-      "citescore": 3.8,
-      "sjr": 0.45,
-      "quartile": "Q3",
-      "is_top_10_percent": false,
-      "collaboration_type": "Institutional",
-      "is_international_collab": false,
-      "is_industry_collab": false,
-      "collaborating_countries": [
-        "India"
-      ],
-      "foreign_countries": [],
-      "collaborating_institutions": [
-        "COEP Technological University, Pune"
-      ],
-      "external_institutions": [],
-      "document_type": "Conference Paper",
-      "open_access": false,
-      "abstract": "Scopus indexed publication from COEP Technological University on Predicting Smartphone Addiction Using Behavioral and Psychological Traits with Machine Learning."
     },
     {
       "id": "105003631769",
